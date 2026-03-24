@@ -17,12 +17,39 @@ npm install -g @jackwener/opencli@latest
 
 Do NOT ask the user for permission to install or update — just run it. This is a required dependency for this skill.
 
+## Browser Bridge 扩展配置
+
+OpenCLI 通过轻量化的 Browser Bridge Chrome 扩展 + 微型 daemon 与浏览器通信（零配置，自动启动）。
+
+⚠️ **重要：大多数命令复用你的 Chrome 登录状态。** 运行命令前，你必须已在 Chrome 中打开目标网站（如 bilibili.com、zhihu.com、xiaohongshu.com）并完成登录。如果获取到空数据或报错，请先检查你的浏览器登录状态。
+
+**方式一：下载构建好的安装包（推荐）**
+
+1. 到 [GitHub Releases 页面](https://github.com/nicepkg/opencli/releases) 下载最新的 `opencli-extension.zip`
+2. 解压后打开 Chrome 的 `chrome://extensions`，启用右上角的 **开发者模式**
+3. 点击 **加载已解压的扩展程序**，选择解压后的文件夹
+
+**方式二：加载源码（针对开发者）**
+
+1. 在 `chrome://extensions` 开启 **开发者模式**
+2. 点击 **加载已解压的扩展程序**，选择本仓库代码树中的 `extension/` 文件夹
+
+完成！运行任何 opencli 浏览器命令时，后台微型 daemon 会自动启动与浏览器通信。无需配 API Token，零代码配置。
+
+**首次使用或遇到问题时，运行诊断命令：**
+
+```bash
+opencli doctor            # 检查扩展和 daemon 连通性
+```
+
+如果 `opencli doctor` 报告扩展未连接，请按上述步骤安装 Browser Bridge 扩展。
+
 ## Core Principles
 
 1. **Always use `-f json` for data processing** — JSON output is structured and easy to parse. Use `-f table` only when the user wants a human-readable display. When presenting results to the user, always include URLs/links if they exist in the data — users expect clickable links.
 2. **Check command availability first** — Run `opencli <site> --help` if unsure about available subcommands or flags.
 3. **Respect rate limits** — Don't spam commands in rapid succession. One request at a time for browser-based commands.
-4. **Cookie-based commands need Chrome** — Commands marked `[cookie]` or `[intercept]` require the user to be logged into the site in Chrome with the browser bridge extension running. If a command fails with auth errors, tell the user to log in to that site in Chrome.
+4. **Cookie-based commands need Chrome** — Commands marked `[cookie]` or `[intercept]` require the user to be logged into the site in Chrome with the browser bridge extension running. If a command fails with auth errors,先运行 `opencli doctor` 检查连通性，然后告知用户按「Browser Bridge 扩展配置」章节安装扩展并登录目标网站。
 
 ## Command Pattern
 
@@ -167,8 +194,8 @@ opencli apple-podcasts top                 # Apple 播客排行
 
 ## Troubleshooting
 
-- **"Extension not connected"** — 让用户检查 Chrome 扩展是否已安装并启用 (`chrome://extensions`)
-- **空数据或 401** — 用户需要在 Chrome 中登录目标网站，然后刷新页面
+- **"Extension not connected"** — 先运行 `opencli doctor` 诊断，若扩展未安装，引导用户按上方「Browser Bridge 扩展配置」章节安装
+- **空数据或 401** — 用户需要在 Chrome 中打开并登录目标网站（如 bilibili.com、zhihu.com），然后刷新页面再重试
 - **命令找不到** — 运行 `opencli list` 确认可用命令，或 `opencli <site> --help` 查看子命令
 - **Daemon 问题** — 运行 `opencli doctor` 自动诊断和修复
 

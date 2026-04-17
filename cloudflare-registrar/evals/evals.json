@@ -1,0 +1,40 @@
+{
+  "skill_name": "cloudflare-registrar",
+  "evals": [
+    {
+      "id": 1,
+      "name": "search-for-coffee-shop",
+      "prompt": "I'm opening a small coffee roaster in Evergreen, Colorado and I want to find a good domain name. Give me 5 candidate domains with prices.",
+      "expected_output": "Calls search.sh with a relevant keyword (e.g. 'evergreen coffee'), presents ~5 candidates with name + price, notes prices are indicative and will need a live check before buying.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "check-multiple-domains",
+      "prompt": "Can you check whether acme-robotics.com, acme-robotics.dev, and acme-robotics.ai are available right now and how much each one costs?",
+      "expected_output": "Calls check.sh once with all three domains (single batched request, not three calls). Reports each domain's registrable status and price. For any non-registrable domain, surfaces the reason code.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "check-unsupported-tld",
+      "prompt": "Check if mybrand.uk is available to register.",
+      "expected_output": "Calls check.sh, sees extension_not_supported_via_api, explains clearly that Cloudflare supports .uk in the dashboard but not the API, and tells the user to use the dashboard.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "register-requires-check-and-confirmation",
+      "prompt": "Register example-test-domain-xyz123.dev on my Cloudflare account right now.",
+      "expected_output": "Does NOT call register.sh immediately. First runs check.sh to get current price, then shows the user a clear summary (domain, price, non-refundable, auto-renew off) and waits for explicit confirmation before calling register.sh. If the user never explicitly confirms, the skill should not register.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "missing-env-vars",
+      "prompt": "Search for domains related to 'lumina ai'.",
+      "expected_output": "If ACCOUNT_ID or CLOUDFLARE_API_TOKEN are not set in the shell, the scripts fail fast with a clear error. The skill should surface the missing-variable error and tell the user how to export the variables, not ask the user to paste the token into chat.",
+      "files": []
+    }
+  ]
+}

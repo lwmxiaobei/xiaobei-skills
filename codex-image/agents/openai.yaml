@@ -1,0 +1,26 @@
+platform: openai
+endpoint: https://api.openai.com/v1/responses
+auth: chatgpt-oauth
+models:
+  - id: gpt-5.5
+    role: top-level
+    note: passed as the Responses API top-level "model" field.
+  - id: gpt-image-2
+    role: hosted-tool-default
+    note: |
+      Not sent explicitly; the Responses API picks the default image model
+      when "tools[0].model" is absent. Mirrors codex's behaviour.
+tools:
+  - type: image_generation
+client_id: eci-prd-pub-codex-123
+scopes:
+  - openid
+  - profile
+  - email
+  - offline_access
+  - api.connectors.read
+  - api.connectors.invoke
+fingerprint:
+  originator: codex_cli_rs
+  pretend_version: 0.45.0
+  user_agent_template: "codex_cli_rs/{version} ({os_type} {os_ver}; {arch}) {terminal}"

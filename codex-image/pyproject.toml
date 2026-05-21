@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codex-image"
+version = "0.1.0"
+description = "Generate or edit images via OpenAI's Responses API using ChatGPT account auth reused from Codex CLI."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "codex-image contributors" }]
+dependencies = [
+    "requests>=2.31",
+    "httpx[http2,socks]>=0.27",
+    "pyjwt>=2.8",
+    "pillow>=10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-mock",
+    "responses>=0.25",
+]
+
+[project.scripts]
+codex-image = "codex_image:main"
+
+[tool.setuptools]
+package-dir = { "" = "scripts" }
+py-modules = ["codex_image", "auth", "responses_client", "http_client", "output"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["scripts"]

@@ -1,6 +1,6 @@
 ---
 name: "codex-image"
-description: "Generate or edit images via OpenAI's Responses API using ChatGPT account auth reused from Codex CLI's auth.json, with built-in PKCE OAuth fallback. Use when the user wants OpenAI's hosted image_generation without an OPENAI_API_KEY, leveraging their ChatGPT subscription quota. Provides generate, edit, login, logout, status."
+description: "Use this skill when the user wants to generate images, edit images, or create images with gpt-image / GPT Image / OpenAI image models. Triggers on requests like 'generate an image', 'create a picture', 'edit this image', 'modify the photo', 'use gpt-image', or any image generation/editing task that should run via OpenAI's hosted image_generation tool."
 ---
 
 # codex-image

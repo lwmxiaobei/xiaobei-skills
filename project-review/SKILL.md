@@ -1,6 +1,6 @@
 ---
 name: project-review
-description: "Deep repository audit and improvement plan. 4-phase process: Discovery, Audit, Strategy, Task Plan. Produces evidence-based findings with severity ratings, prioritized milestones, and actionable tasks."
+description: "Use when you need a systematic code review. Works on full repos, directories, code snippets, PR diffs, or freshly written functions. Scenarios: onboarding to an unfamiliar project, pre-deploy quality checks, assessing tech debt, doing code reviews with structure instead of gut feeling, or producing a prioritized improvement plan."
 triggers:
   - "review this repo"
   - "audit this codebase"

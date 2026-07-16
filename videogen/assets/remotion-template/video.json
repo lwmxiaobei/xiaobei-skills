@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "id": "videogen-sample",
+  "title": "纸片分层视频示例",
+  "description": "用于验证通用模板的内置示例",
+  "video": {
+    "width": 720,
+    "height": 1280,
+    "fps": 30,
+    "backgroundColor": "#2a1210"
+  },
+  "theme": {
+    "fontFamily": "PingFang SC, Noto Sans CJK SC, sans-serif",
+    "textColor": "#f8efd9",
+    "accentColor": "#f1bd5b",
+    "captionColor": "#ffffff",
+    "captionBackground": "rgba(32, 18, 14, 0.78)",
+    "captionFontSize": 42
+  },
+  "scenes": [
+    {
+      "id": "opening",
+      "durationSeconds": 2,
+      "narrationText": "一个主题，可以变成一条完整视频。",
+      "background": {
+        "color": "#8c231e",
+        "src": "assets/paper-bg.svg",
+        "fit": "cover",
+        "startScale": 1,
+        "endScale": 1.035
+      },
+      "elements": [
+        {
+          "id": "opening-title",
+          "type": "text",
+          "text": "一个主题\n变成一条视频",
+          "x": 360,
+          "y": 260,
+          "width": 620,
+          "zIndex": 20,
+          "fontSize": 76,
+          "fontWeight": 800,
+          "lineHeight": 1.15,
+          "color": "#3b1712",
+          "enter": {
+            "type": "pop",
+            "atSeconds": 0.08,
+            "durationSeconds": 0.55
+          }
+        },
+        {
+          "id": "main-figure",
+          "type": "image",
+          "src": "assets/figure.svg",
+          "x": 360,
+          "y": 790,
+          "width": 500,
+          "zIndex": 10,
+          "role": "primary",
+          "motionPreset": "character",
+          "enter": {
+            "type": "rise",
+            "atSeconds": 0.22,
+            "durationSeconds": 0.72,
+            "distance": 110
+          },
+          "drift": {
+            "x": 5,
+            "y": 8,
+            "scale": 0.012,
+            "periodSeconds": 3.5
+          },
+          "style": {
+            "filter": "drop-shadow(0 20px 14px rgba(40,20,12,0.35))"
+          }
+        }
+      ],
+      "captions": [
+        {
+          "text": "一个主题，可以变成一条完整视频",
+          "startSeconds": 0.18,
+          "endSeconds": 1.78,
+          "emphasis": "完整视频"
+        }
+      ]
+    },
+    {
+      "id": "pipeline",
+      "durationSeconds": 2,
+      "narrationText": "文案、素材、配音和动画，由同一套流程编排。",
+      "background": {
+        "color": "#741d1a",
+        "src": "assets/paper-bg.svg",
+        "fit": "cover",
+        "startScale": 1.025,
+        "endScale": 1
+      },
+      "elements": [
+        {
+          "id": "pipeline-title",
+          "type": "text",
+          "text": "内容生产流水线",
+          "x": 360,
+          "y": 220,
+          "width": 610,
+          "zIndex": 30,
+          "fontSize": 70,
+          "fontWeight": 800,
+          "color": "#3b1712",
+          "enter": {
+            "type": "fade",
+            "atSeconds": 0.06,
+            "durationSeconds": 0.45
+          }
+        },
+        {
+          "id": "workflow-card",
+          "type": "image",
+          "src": "assets/workflow.svg",
+          "x": 360,
+          "y": 670,
+          "width": 630,
+          "zIndex": 10,
+          "role": "primary",
+          "enter": {
+            "type": "left",
+            "atSeconds": 0.18,
+            "durationSeconds": 0.75,
+            "distance": 90
+          },
+          "drift": {
+            "y": 5,
+            "periodSeconds": 3.2
+          }
+        }
+      ],
+      "captions": [
+        {
+          "text": "文案、素材、配音和动画，由同一套流程编排",
+          "startSeconds": 0.15,
+          "endSeconds": 1.8,
+          "emphasis": "同一套流程"
+        }
+      ]
+    },
+    {
+      "id": "closing",
+      "durationSeconds": 2,
+      "narrationText": "保留工程文件，也可以随时重新编辑和渲染。",
+      "background": {
+        "color": "#8c231e",
+        "src": "assets/paper-bg.svg",
+        "fit": "cover",
+        "startScale": 1,
+        "endScale": 1.04
+      },
+      "elements": [
+        {
+          "id": "scroll",
+          "type": "image",
+          "src": "assets/scroll.svg",
+          "x": 360,
+          "y": 610,
+          "width": 650,
+          "zIndex": 10,
+          "role": "primary",
+          "enter": {
+            "type": "pop",
+            "atSeconds": 0.1,
+            "durationSeconds": 0.65
+          }
+        },
+        {
+          "id": "closing-title",
+          "type": "text",
+          "text": "可编辑\n可复用\n可重新渲染",
+          "x": 360,
+          "y": 590,
+          "width": 500,
+          "zIndex": 20,
+          "fontSize": 74,
+          "fontWeight": 800,
+          "lineHeight": 1.28,
+          "color": "#3b1712",
+          "enter": {
+            "type": "fade",
+            "atSeconds": 0.35,
+            "durationSeconds": 0.55
+          }
+        }
+      ],
+      "captions": [
+        {
+          "text": "保留工程文件，随时重新编辑和渲染",
+          "startSeconds": 0.18,
+          "endSeconds": 1.78,
+          "emphasis": "重新编辑"
+        }
+      ]
+    }
+  ]
+}

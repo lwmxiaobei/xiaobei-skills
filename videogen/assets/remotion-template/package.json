@@ -1,0 +1,22 @@
+{
+  "name": "videogen-project",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts MainVideo out/video.mp4 --codec=h264 --overwrite",
+    "still": "remotion still src/index.ts MainVideo out/cover.png --frame=30 --overwrite"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.489",
+    "@remotion/media": "4.0.489",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "remotion": "4.0.489"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.16",
+    "@types/react-dom": "19.1.9",
+    "typescript": "5.9.3"
+  }
+}

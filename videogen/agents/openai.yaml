@@ -1,0 +1,4 @@
+interface:
+  display_name: "分层动态视频生成"
+  short_description: "生成精确时长、写实人物分层、自然中文旁白和轻量预览视频"
+  default_prompt: "使用 $videogen 将我的主题制作成精确时长、人物可动并带中文旁白的完整视频。"

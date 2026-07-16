@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="660" viewBox="0 0 640 660">
+  <g stroke="#f8efd9" stroke-width="16" stroke-linejoin="round" paint-order="stroke fill">
+    <rect x="40" y="40" width="560" height="580" rx="36" fill="#7d211d"/>
+    <rect x="86" y="92" width="468" height="104" rx="22" fill="#f2dfb1"/>
+    <rect x="86" y="278" width="205" height="122" rx="24" fill="#d99a46"/>
+    <rect x="349" y="278" width="205" height="122" rx="24" fill="#d99a46"/>
+    <rect x="180" y="485" width="280" height="90" rx="24" fill="#f2dfb1"/>
+  </g>
+  <g fill="#3b1712" font-family="PingFang SC, sans-serif" font-weight="700" text-anchor="middle">
+    <text x="320" y="160" font-size="42">主题与文案</text>
+    <text x="188" y="352" font-size="38">图片素材</text>
+    <text x="452" y="352" font-size="38">配音字幕</text>
+    <text x="320" y="543" font-size="42">Remotion 渲染</text>
+  </g>
+  <g stroke="#f2dfb1" stroke-width="14" fill="none" stroke-linecap="round">
+    <path d="M320 207 L320 248"/>
+    <path d="M320 248 L188 248 L188 267"/>
+    <path d="M320 248 L452 248 L452 267"/>
+    <path d="M188 414 L188 448 L320 448 L320 474"/>
+    <path d="M452 414 L452 448 L320 448"/>
+  </g>
+</svg>

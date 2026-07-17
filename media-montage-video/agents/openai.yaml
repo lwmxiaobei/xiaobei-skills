@@ -1,0 +1,4 @@
+interface:
+  display_name: "Media Montage Video"
+  short_description: "将多个视频和图片自动混剪为带文案、旁白和字幕的成片"
+  default_prompt: "使用 $media-montage-video 将我提供的视频和图片混剪成带旁白、字幕和画面文案的竖屏短视频。"

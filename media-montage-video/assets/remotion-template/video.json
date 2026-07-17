@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "media-montage-sample",
+  "title": "多媒体混剪示例",
+  "description": "替换示例素材、旁白和文案后即可渲染",
+  "video": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "backgroundColor": "#050a08"
+  },
+  "theme": {
+    "fontFamily": "PingFang SC, sans-serif",
+    "textColor": "#f3fff7",
+    "accentColor": "#ffd92f",
+    "captionColor": "#10130f",
+    "captionBackground": "#ffd92f",
+    "captionFontSize": 42,
+    "captionBottom": 420,
+    "captionMaxWidth": 800
+  },
+  "layout": {
+    "preset": "tech-explainer",
+    "brandLabel": "MEDIA LAB",
+    "headline": "多个视频与图片自动混剪",
+    "subheadline": "旁白、字幕与画面文案同步生成",
+    "contentTop": 440,
+    "contentHeight": 760,
+    "gridColor": "rgba(67,255,139,0.10)"
+  },
+  "scenes": [
+    {
+      "id": "scene-01",
+      "durationSeconds": 3,
+      "narrationText": "先整理素材，再确定每个镜头承担的表达任务。",
+      "background": {"color": "#050a08"},
+      "elements": [
+        {
+          "id": "placeholder",
+          "type": "image",
+          "src": "assets/media-placeholder.svg",
+          "x": 540,
+          "y": 820,
+          "width": 1080,
+          "height": 760,
+          "fit": "cover",
+          "role": "static",
+          "motionPreset": "static"
+        }
+      ],
+      "captions": [
+        {"text": "先整理素材", "startSeconds": 0.1, "endSeconds": 1.35},
+        {"text": "再规划镜头任务", "startSeconds": 1.35, "endSeconds": 2.9}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="760" viewBox="0 0 1080 760">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10251b"/>
+      <stop offset="1" stop-color="#07100c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="760" fill="url(#bg)"/>
+  <rect x="90" y="80" width="900" height="600" rx="44" fill="#172d23" stroke="#43ff8b" stroke-opacity=".38" stroke-width="4"/>
+  <circle cx="540" cy="330" r="86" fill="#43ff8b" fill-opacity=".16"/>
+  <path d="M515 280l86 50-86 50z" fill="#43ff8b"/>
+  <text x="540" y="500" text-anchor="middle" fill="#eafaf0" font-family="sans-serif" font-size="42" font-weight="700">将视频和图片放入 public/assets</text>
+</svg>

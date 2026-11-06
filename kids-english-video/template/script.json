@@ -1,0 +1,103 @@
+{
+  "title": "Do You Like Carrots?",
+  "title_zh": "你喜欢胡萝卜吗？",
+  "grammar": "doyoulike",
+  "style": "flat",
+  "music": "ukulele",
+  "bpm": 100,
+  "voices": {
+    "bobo": {"id": "4fcb3a423c61415fb35604eba567d95f", "name": "Energetic Child", "speed": 1.0},
+    "rabbit": {"id": "88aef4a31fd94aaa874c32252245b43f", "name": "Cute child!", "speed": 1.0},
+    "fish": {"id": "0c0f9d7d87e44e2dabb53ebb092f5f53", "name": "Child (inquisitive boy)", "speed": 1.05},
+    "bird": {"id": "4e407b98cb034f74b3863ec33c567c83", "name": "Child (cheerful girl)", "speed": 1.1},
+    "teacher": {"id": "73b5c16a6e504d6a97868581ada2b8d3", "name": "Teacher", "speed": 0.95}
+  },
+  "scenes": [
+    {"id": "intro", "events": [
+      {"rest": 6},
+      {"who": "bobo", "say": "Hi! I'm Bobo!", "zh": "嗨！我是波波！"},
+      {"who": "bobo", "say": "Let's have a picnic!", "zh": "我们去野餐吧！"},
+      {"rest": 2}
+    ]},
+    {"id": "carrots", "animal": "rabbit", "events": [
+      {"rest": 2},
+      {"who": "bobo", "say": "Do you like carrots?", "zh": "你喜欢胡萝卜吗？"},
+      {"who": "rabbit", "say": "Yes, I do!", "zh": "我喜欢！"},
+      {"who": "bobo", "say": "Do you like carrots?", "zh": "你喜欢胡萝卜吗？"},
+      {"who": "rabbit", "say": "Yes, I do!", "zh": "我喜欢！"},
+      {"rest": 1},
+      {"who": "teacher", "say": "Carrots!", "card": {"en": "carrots", "zh": "胡萝卜"}},
+      {"who": "rabbit", "say": "Carrots!", "chant": 3, "every": 2, "zh": "胡萝卜！", "sfx": [{"name": "crunch", "at": "end", "offset": -0.05, "gain": -5}]},
+      {"who": ["rabbit", "bobo"], "say": "Carrots!", "chant": 3, "every": 2, "zh": "胡萝卜！", "sfx": [{"name": "crunch", "at": "end", "offset": -0.05, "gain": -5}]},
+      {"rest": 2}
+    ]},
+    {"id": "bananas", "animal": "fish", "events": [
+      {"rest": 2},
+      {"who": "bobo", "say": "Do you like bananas?", "zh": "你喜欢香蕉吗？"},
+      {"who": "fish", "say": "Yes, I do!", "zh": "我喜欢！"},
+      {"who": "bobo", "say": "Do you like bananas?", "zh": "你喜欢香蕉吗？"},
+      {"who": "fish", "say": "Yes, I do!", "zh": "我喜欢！"},
+      {"rest": 1},
+      {"who": "teacher", "say": "Bananas!", "card": {"en": "bananas", "zh": "香蕉"}},
+      {"who": "fish", "say": "Bananas!", "chant": 3, "every": 2, "zh": "香蕉！", "sfx": [{"name": "munch", "at": "end", "offset": -0.05, "gain": -4}]},
+      {"who": ["fish", "bobo"], "say": "Bananas!", "chant": 3, "every": 2, "zh": "香蕉！", "sfx": [{"name": "munch", "at": "end", "offset": -0.05, "gain": -4}]},
+      {"rest": 2}
+    ]},
+    {"id": "apples", "animal": "bird", "events": [
+      {"rest": 2},
+      {"who": "bobo", "say": "Do you like apples?", "zh": "你喜欢苹果吗？"},
+      {"who": "bird", "say": "Yes, I do!", "zh": "我喜欢！"},
+      {"who": "bobo", "say": "Do you like apples?", "zh": "你喜欢苹果吗？"},
+      {"who": "bird", "say": "Yes, I do!", "zh": "我喜欢！"},
+      {"rest": 1},
+      {"who": "teacher", "say": "Apples!", "card": {"en": "apples", "zh": "苹果"}},
+      {"who": "bird", "say": "Apples!", "chant": 3, "every": 2, "zh": "苹果！", "sfx": [{"name": "crisp", "at": "end", "offset": -0.05, "gain": -6}]},
+      {"who": ["bird", "bobo"], "say": "Apples!", "chant": 3, "every": 2, "zh": "苹果！", "sfx": [{"name": "crisp", "at": "end", "offset": -0.05, "gain": -6}]},
+      {"rest": 2}
+    ]},
+    {"id": "twist", "events": [
+      {"rest": 2},
+      {"who": ["rabbit", "fish", "bird"], "say": "Bobo, do you like broccoli?", "zh": "波波，你喜欢西兰花吗？"},
+      {"who": "bobo", "say": "No, I don't!", "zh": "我不喜欢！", "sfx": [{"name": "yuck", "at": "start", "offset": 0.05, "gain": -8}]},
+      {"rest": 1},
+      {"who": ["rabbit", "fish", "bird"], "say": "Try it!", "zh": "尝一尝嘛！", "sfx": [{"name": "pop", "at": "start", "offset": -0.08, "gain": -6}]},
+      {"act": "try", "beats": 6, "sfx": [{"name": "crunch", "beat": 2, "gain": -3}, {"name": "munch", "beat": 3, "gain": -8}, {"name": "munch", "beat": 3.5, "gain": -8}, {"name": "munch", "beat": 4, "gain": -8}, {"name": "munch", "beat": 4.5, "gain": -8}, {"name": "gulp", "beat": 4.9, "gain": -8}, {"name": "wow", "beat": 5, "gain": -9}, {"name": "twinkle", "beat": 5.3, "gain": -9}]},
+      {"who": "bobo", "say": "Yummy! Yes, I do!", "zh": "好吃！我喜欢！"},
+      {"rest": 1},
+      {"who": "teacher", "say": "Broccoli!", "card": {"en": "broccoli", "zh": "西兰花"}},
+      {"who": ["bobo", "rabbit", "fish", "bird"], "say": "Broccoli!", "chant": 3, "every": 2, "zh": "西兰花！", "sfx": [{"name": "crunch", "at": "end", "offset": -0.05, "gain": -6}]},
+      {"rest": 3}
+    ]},
+    {"id": "quiz", "events": [
+      {"rest": 2},
+      {"who": "teacher", "say": "Now it's your turn!", "zh": "轮到你啦！"},
+      {"rest": 1},
+      {"who": "teacher", "say": "Do you like carrots?", "zh": "你喜欢胡萝卜吗？", "quiz": "carrots"},
+      {"rest": 3, "wait": true},
+      {"who": "bobo", "say": "Yes, I do!", "zh": "我喜欢！", "answer": "carrots"},
+      {"rest": 1},
+      {"who": "teacher", "say": "Do you like bananas?", "zh": "你喜欢香蕉吗？", "quiz": "bananas"},
+      {"rest": 3, "wait": true},
+      {"who": "bobo", "say": "Yes, I do!", "zh": "我喜欢！", "answer": "bananas"},
+      {"rest": 1},
+      {"who": "teacher", "say": "Do you like apples?", "zh": "你喜欢苹果吗？", "quiz": "apples"},
+      {"rest": 3, "wait": true},
+      {"who": "bobo", "say": "Yes, I do!", "zh": "我喜欢！", "answer": "apples"},
+      {"rest": 1},
+      {"who": "teacher", "say": "Do you like broccoli?", "zh": "你喜欢西兰花吗？", "quiz": "broccoli"},
+      {"rest": 3, "wait": true},
+      {"who": "bobo", "say": "Yes, I do!", "zh": "我喜欢！", "answer": "broccoli"},
+      {"rest": 1},
+      {"who": "teacher", "say": "Do you like socks?", "zh": "你喜欢吃袜子吗？", "quiz": "socks"},
+      {"rest": 3, "wait": true},
+      {"who": "bobo", "say": "No, I don't!", "zh": "我不喜欢！", "answer": "socks"},
+      {"rest": 2}
+    ]},
+    {"id": "outro", "events": [
+      {"rest": 1},
+      {"who": "bobo", "say": "Bye-bye!", "zh": "再见！"},
+      {"who": ["rabbit", "fish", "bird"], "say": "Bye-bye!", "zh": "再见！"},
+      {"rest": 5}
+    ]}
+  ]
+}

@@ -1,0 +1,5 @@
+name: "ancient-cctv-video"
+title: "Ancient CCTV Video"
+description: "Make a silent ancient Chinese story video in fake surveillance camera style, with fixed camera, black and white footage, running timestamp and CAM label, chained clip by clip from the previous clip's last frame."
+category: "Work and knowledge"
+include_in_prompt: true

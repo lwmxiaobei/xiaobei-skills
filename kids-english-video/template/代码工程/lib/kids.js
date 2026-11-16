@@ -24,6 +24,22 @@ const BASE_PAL = {
   blanket: ['#FFFFFF', '#FF6F6F'], plate: ['#FFFFFF', '#ECE7F5'], quizBg: '#FFF6DA', quizDot: 'rgba(255,214,120,0.35)',
   yes: '#26B34A', no: '#FF5A5F', hearts: ['#FF6F91', '#FF9EB5'], textStroke: '#FFFFFF',
   title: ['#FF7A1A', '#EE4F96', '#2F7BFF', '#E3A100', '#7A4CFF'],
+  // 场景库（kids_scenes.js）和旅程转场（kids_trans.js）用的颜色
+  sun: '#FFD43B', sunGlow: 'rgba(255,212,59,0.22)', sea: '#3FB2E8', sea2: '#8FD6F7', sand: '#F6DFA6', sand2: '#EBC982', gull: '#FFFFFF',
+  palm: '#4DBF68', palm2: '#3AA857', shells: ['#FFB3C7', '#FFE08A', '#FFFFFF'],
+  snowSky: '#CFE3F5', snow: '#FFFFFF', snow2: '#E1ECF7', mountain: ['#AFC4E2', '#98B0D6'], pine: '#3E9E6E', pine2: '#2F8A5D', coal: '#3A3346', nose: '#FF8A3D',
+  night: '#1F2757', night2: '#3A4688', moon: '#FFF3B0', moonGlow: 'rgba(255,243,176,0.18)', starLite: '#FFF6CC', glowWin: '#FFD86B',
+  houseN: '#6A5AA8', roofN: '#4A3C82', hillN: ['#2C376B', '#34427A'], grassN: '#2F5B4A', grassN2: '#244738', firefly: '#FFF59A', fireflyGlow: 'rgba(255,245,154,0.22)',
+  forestSky: '#E6F5DF', trunkFar: '#CFE1C2', leafFar: '#B9DDA8', trunk2: '#8F5E35', mushroom: '#FF6B6B', stem: '#FFF1DC', bush: '#5DBE6E', fern: '#3FAF5C',
+  fall: ['#F4B942', '#E8743B', '#9ACD5A'], wings: ['#FF8FB1', '#B48CFF', '#FFD43B'],
+  wallK: '#FFF1D6', tile: '#FFFFFF', tile2: '#DCEFF7', floor: '#E9C9A0', floor2: '#D8B387', wood: '#C98C55', wood2: '#A8703F',
+  fridge: '#EEF5FB', fridge2: '#C9DDEC', glass: '#BFE6FF', frame: '#FFFFFF', steam: 'rgba(255,255,255,0.5)', pot: '#FF6F6F', jars: ['#FFB3C7', '#A8D8FF', '#FFE08A'],
+  wallB: '#E8E2FF', wallB2: '#D8CEFF', bed: '#7FB8FF', bed2: '#5E9DEB', pillow: '#FFFFFF', rug: '#FFB3C7', rug2: '#FF8FB1', curtain: '#FFD06B', curtain2: '#F2B94A',
+  slide: '#FF6B6B', metal: '#8C96A8', seat: '#FF9F43', fence: '#FFFFFF', fence2: '#E6DCCB', balloons: ['#FF6F91', '#7CC8FF', '#FFD43B', '#7BD389'],
+  deep: '#1E7FC2', deep2: '#62C6F0', ray: 'rgba(255,255,255,0.13)', deepFar: '#3D9AD3', weed: '#3DBE7A', weed2: '#2A9F63', coral: ['#FF8FA3', '#FFB86B', '#B48CFF'],
+  bed3: '#F2D9A0', bed4: '#E2C27F', rock: '#8C94B8', rock2: '#737BA3', bubble: 'rgba(255,255,255,0.35)', bubbleRim: '#FFFFFF', school: ['#FFD43B', '#FF8A5B'],
+  map: '#FFF4D6', mapLine: 'rgba(43,35,64,0.45)', mapDone: '#7BD389', home: '#FFB86B', roof: '#E8545A', pill: 'rgba(255,255,255,0.92)',
+  train: ['#FF5A5F', '#2F7BFF', '#FFD43B', '#7BD389'], wheel: '#3A3346', smoke: '#FFFFFF', door: '#C98C55', door2: '#A8703F', knob: '#FFD43B',
 };
 const THEMES = {
   flat: {
@@ -128,6 +144,7 @@ function pat(g, key, m) {
 // ---------- 抖动（SVG 位移滤镜） ----------
 // 每个画风建几张同参数不同种子的滤镜；boil > 0 时按 boil 次/秒换种子（手绘线条"沸腾"），0 = 静止
 const FIL = {};
+const BANDS = [780, 540];        // K.layer 的 top 选项能用的底部条（屏幕 y 起点）。滤镜耗时和区域面积成正比
 function filters() {
   const M = TH.mat; if (!M || FIL.ok) return; FIL.ok = true;
   const w = M.wobble || M.jag; if (!w) return;
@@ -147,7 +164,8 @@ function filters() {
   }
   const mk = (id, url, scale) => `<filter id="${id}" ${reg}><feImage href="${url}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none" result="n"/>`
     + `<feDisplacementMap in="SourceGraphic" in2="n" scale="${scale}" xChannelSelector="R" yChannelSelector="G"/></filter>`;
-  svg.innerHTML = urls.map((u, k) => mk(`kw${k}`, u, w.amp * 2) + mk(`kwu${k}`, u, w.amp * 2 * (w.ui ?? 0.5))).join('');
+  svg.innerHTML = urls.map((u, k) => mk(`kw${k}`, u, w.amp * 2) + mk(`kwu${k}`, u, w.amp * 2 * (w.ui ?? 0.5))
+    + BANDS.map(b => mk(`kwb${b}_${k}`, u, w.amp * 2).replace(`y="0" width="${W}" height="${H}" color`, `y="${b}" width="${W}" height="${H - b}" color`)).join('')).join('');
   K.ready = Promise.all(urls.map(u => { const im = new Image(); im.src = u; return im.decode(); })).then(() => new Promise(r => setTimeout(r, 300)));
 }
 const boilK = t => { const w = TH.mat.wobble || TH.mat.jag; return w && w.boil ? Math.floor(t * w.boil) % 4 : 0; };
@@ -181,7 +199,14 @@ function patch(g, M) {
 }
 // 代码画的一组东西走画风材质。fn(g) 里只用 g 画（别用外面的 c）。
 // 某些填充不想加料（印花、细碎小块）：g.plain = true 画完再改回 false。
-K.layer = (c, kind, fn) => {
+// o.top：fn 只画在世界坐标 y ≥ top 的地方（场景前景）。只处理画面底部那一条，每层省 30–50 ms；画到 top 以上的会被裁掉
+const bandOf = (M, T, top) => {
+  if (top == null || T.b || T.c) return 0;
+  const w = M.wobble || M.jag, sh = M.shadow;
+  const y = T.d * top + T.f - (w ? w.amp : 0) - (sh ? sh.blur * 2 + Math.abs(sh.dy) : 0) - (M.outline ? M.outline.w : 0) - 8;
+  return BANDS.find(b => b <= y) || 0;
+};
+K.layer = (c, kind, fn, o = {}) => {
   const M = TH.mat;
   if (!M) return fn(c);
   const L = buf(depth), g = L.getContext('2d');
@@ -195,12 +220,12 @@ K.layer = (c, kind, fn) => {
   depth++;
   try { g.save(); fn(g); g.restore(); } finally { depth--; unpatch(); }
   g.setTransform(1, 0, 0, 1, 0, 0); g.shadowColor = 'transparent'; g.shadowBlur = 0; g.shadowOffsetX = 0; g.shadowOffsetY = 0;
-  const ui = kind === 'ui', bk = boilK(T_NOW);
+  const ui = kind === 'ui', bk = boilK(T_NOW), b = ui ? 0 : bandOf(M, T, o.top);
   const mT = new DOMMatrix([T.a, T.b, T.c, T.d, T.e, T.f]);                       // 纹理跟着镜头走，不会"浴室玻璃"
   const over = (key, a, op, rot = 0, shift = 0) => {
     if (a <= 0) return;
     g.globalCompositeOperation = op; g.globalAlpha = a;
-    g.fillStyle = pat(g, key, mT.translate(shift * 97, shift * 61).rotate(rot * 180 / Math.PI)); g.fillRect(0, 0, W, H);
+    g.fillStyle = pat(g, key, mT.translate(shift * 97, shift * 61).rotate(rot * 180 / Math.PI)); g.fillRect(0, b, W, H - b);
   };
   if (M.tooth) over('tooth', ui ? M.tooth.ui : M.tooth.a, 'destination-out', M.tooth.rot, bk);
   if (M.grain) over('grain', M.grain * (ui ? 0.5 : 1), 'source-atop', 0.3, bk);
@@ -209,8 +234,9 @@ K.layer = (c, kind, fn) => {
   if (M.bloom) over('bloom', M.bloom * (ui ? 0.3 : 1), 'source-atop', 0, 3);
   g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
   c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
-  if (M.wobble || M.jag) c.filter = `url(#${ui ? 'kwu' : 'kw'}${bk})`;
-  c.drawImage(L, 0, 0); c.restore();
+  if (M.wobble || M.jag) c.filter = b ? `url(#kwb${b}_${bk})` : `url(#${ui ? 'kwu' : 'kw'}${bk})`;
+  if (b) c.drawImage(L, 0, b, W, H - b, 0, b, W, H - b); else c.drawImage(L, 0, 0);
+  c.restore();
 };
 // 整画面收尾：纸纹、暗角
 K.finish = c => {
@@ -226,6 +252,10 @@ K.finish = c => {
 };
 
 // ---------- 数据 ----------
+// 角色主色（气泡描边、名字颜色）的默认值，片段的 cfg.colors 覆盖。客串动物和猫头鹰见 references/characters.md
+const DEF_COL = { teacher: '#7A4CFF', panda: '#3D3D3D', elephant: '#5E8FCC', frog: '#4FA82A', penguin: '#1F4E8C', monkey: '#9A5A2E', dino: '#169C8E', owl: '#C27A2C' };
+// 脚下影子半宽（乘缩放前），没写的 150
+K.SHW = { elephant: 190, frog: 120, owl: 130 };
 // cfg: { vocab: {词: {img, zh, col, …}}, colors: {角色: 主色}, scale: {角色: 缩放}, wipe: {场景: 颜色}, shadowW: {角色: 脚下影子半宽} }
 K.init = (ctx, cfg = {}) => {
   A = {};
@@ -237,8 +267,9 @@ K.init = (ctx, cfg = {}) => {
   K.TH = TH; K.P = TH.pal; K.EN = TH.en; K.ZH = TH.zh; K.ZH2 = TH.zh2; K.INK = TH.ink; K.SUB = TH.sub;
   K.W = W; K.H = H; K.FPS = FPS; K.BEAT = D.beat; K.LINES = D.lines || []; K.ACTS = D.acts || []; K.WAITS = D.waits || []; K.SCN = D.scenes || [];
   K.MOUTH = D.mouth || {}; K.TITLE = D.title || ''; K.TITLE_ZH = D.title_zh || '';
-  K.VOC = cfg.vocab || {}; K.COL = { teacher: '#7A4CFF', ...(cfg.colors || {}) }; K.SCALE = cfg.scale || {}; K.WIPE = cfg.wipe || {};
+  K.VOC = cfg.vocab || {}; K.COL = { ...DEF_COL, ...(cfg.colors || {}) }; K.SCALE = cfg.scale || {}; K.WIPE = cfg.wipe || {};
   K.GY = cfg.ground ?? 935;
+  K.OWL_ON = D.owl !== false;                                                      // 猫头鹰老师（kids_stage.js 的 K.owl），台本 "owl": false 关掉
   K.ready = Promise.resolve();
   window.frameKey = (TH.step || 1) > 1 ? (t => Math.floor(t * FPS / TH.step + 1e-6)) : null;
   if (TH.mat) { textures(); filters(); }
@@ -246,7 +277,7 @@ K.init = (ctx, cfg = {}) => {
 K.fonts = ['PuHui-Black', 'PuHui-Bold', 'LXGWWenKai-500'];
 
 // ---------- 小工具 ----------
-K.img = n => { const im = A[n]; if (!im) throw new Error('缺素材 ' + n + '（assets/' + n + '.png）'); return im; };
+K.img = n => { const im = A[n]; if (!im) throw new Error(`缺素材 ${n}（assets/${n}.png）：${TH.id} 画风的 characters/${TH.id}/ 里没有这张，按 references/characters.md 生成后放进 assets/，或者换一个有这张图的画风`); return im; };
 K.has = n => !!A[n];
 K.back = (p, s = 2.2) => MO.backOut(clamp(p), s);
 K.popIn = (t, t0, d = 0.3, s = 2.4) => t < t0 ? 0 : K.back((t - t0) / d, s);
@@ -285,7 +316,13 @@ K.ch = (c, who, x, y, t, o = {}) => {
   const b = o.still ? { dy: 0, sx: 1, sy: 1 } : K.bob(t, o.phase || 0);
   const s = o.s ?? K.SCALE[who] ?? 0.9, lift = o.lift || 0;
   const talk = 1 + 0.012 * (o.pose ? m : 0);
-  if (o.shadow !== false) K.shadow(c, x, y, s * (o.shw || 150), lift);
+  if (o.move) {                                                                    // 程序动作 {dx, dy, rot, sx, sy}（kids_stage.js 的 K.mv.*）叠加上去
+    const mv = o.move, mx = x + (mv.dx || 0);
+    if (o.shadow !== false) K.shadow(c, mx, y, s * (o.shw || K.SHW[who] || 150), lift + Math.max(0, -(mv.dy || 0)));
+    return K.spr(c, name, mx, y + (mv.dy || 0) + b.dy * (o.bob ?? 1) - lift, s,
+      { flip: o.flip, sx: b.sx * (o.sx || 1) * (mv.sx ?? 1), sy: b.sy * talk * (o.sy || 1) * (mv.sy ?? 1), rot: (o.rot || 0) + (mv.rot || 0), alpha: o.alpha, cast: o.cast });
+  }
+  if (o.shadow !== false) K.shadow(c, x, y, s * (o.shw || K.SHW[who] || 150), lift);
   return K.spr(c, name, x, y + b.dy * (o.bob ?? 1) - lift, s,
     { flip: o.flip, sx: b.sx * (o.sx || 1), sy: b.sy * talk * (o.sy || 1), rot: o.rot, alpha: o.alpha, cast: o.cast });
 };
@@ -322,16 +359,20 @@ K.bubble = (c, en, zh, cx, cy, tx, ty, p, col) => {
   if (p <= 0.001) return;
   K.layer(c, 'ui', g => bubbleRaw(g, en, zh, cx, cy, tx, ty, p, col));
 };
+// 气泡宽度（K.owl 按它把气泡贴在猫头鹰左边）
+K.bubbleW = (c, en, zh) => Math.max(K.tw(c, en, 70, K.EN), zh ? K.tw(c, zh, 38, K.ZH2) : 0) + 90;
 function bubbleRaw(c, en, zh, cx, cy, tx, ty, p, col) {
-  const { EN, ZH2 } = K;
-  const bw = Math.max(K.tw(c, en, 70, EN), zh ? K.tw(c, zh, 38, ZH2) : 0) + 90, bh = zh ? 178 : 124, r = 46;
+  const bw = K.bubbleW(c, en, zh), bh = zh ? 178 : 124, r = 46;
   cx = clamp(cx, bw / 2 + 24, W - bw / 2 - 24);
   const x = cx - bw / 2, y = cy - bh / 2, bx = clamp(tx, x + r + 34, x + bw - r - 34);
+  // 尾巴点在气泡右边：从右边沿伸出去；否则从底边
+  const side = tx > x + bw, sh = Math.min(24, bh / 2 - r - 2), by = clamp(ty, y + r + sh, y + bh - r - sh);
   c.save(); c.translate(tx, ty); c.scale(p, p); c.translate(-tx, -ty);
   const path = (dx, dy) => {
     c.beginPath(); c.moveTo(x + r + dx, y + dy); c.lineTo(x + bw - r + dx, y + dy); c.quadraticCurveTo(x + bw + dx, y + dy, x + bw + dx, y + r + dy);
+    if (side) { c.lineTo(x + bw + dx, by - sh + dy); c.lineTo(tx + dx, ty + dy); c.lineTo(x + bw + dx, by + sh + dy); }
     c.lineTo(x + bw + dx, y + bh - r + dy); c.quadraticCurveTo(x + bw + dx, y + bh + dy, x + bw - r + dx, y + bh + dy);
-    c.lineTo(bx + 30 + dx, y + bh + dy); c.lineTo(tx + dx, ty + dy); c.lineTo(bx - 30 + dx, y + bh + dy);
+    if (!side) { c.lineTo(bx + 30 + dx, y + bh + dy); c.lineTo(tx + dx, ty + dy); c.lineTo(bx - 30 + dx, y + bh + dy); }
     c.lineTo(x + r + dx, y + bh + dy); c.quadraticCurveTo(x + dx, y + bh + dy, x + dx, y + bh - r + dy);
     c.lineTo(x + dx, y + r + dy); c.quadraticCurveTo(x + dx, y + dy, x + r + dx, y + dy); c.closePath();
   };
@@ -492,7 +533,7 @@ K.wordCard = (c, t, sc, o = {}) => {
   const L = K.LINES.find(l => l.scene === sc.id && l.card); if (!L || t < L.t0 - 0.12) return;
   const key = L.card.en, V = K.VOC[key] || { col: K.INK };
   const first = K.chantsOf(sc.id).find(l => l.t0 > L.t0);
-  const tb = first ? first.t0 - 0.32 : Infinity;
+  const tb = first ? first.t0 - 0.32 : L.t1 + 0.3;                                // 没有领念（口令卡）：念完 0.3 秒后缩到角上
   const p = K.popIn(t, L.t0 - 0.12, 0.42), q = ss(tb, tb + 0.35, t);
   const out = 1 - ss(sc.t1 - 0.5, sc.t1 - 0.2, t);
   const KS = 0.42, k = lerp(1, KS, q) * p * out * (1 + 0.04 * K.mouthAt('teacher', t));
@@ -516,13 +557,26 @@ K.wordCard = (c, t, sc, o = {}) => {
   });
 };
 // 领念/跟念：Carrots! Carrots! Carrots! 一个词一个词蹦出来排成一行（每组 chant 一行，下一组接着替换）。col 默认用卡片单词的颜色
+// 领念那一排的透明度：这一组念完后场景里还有别的台词（齐说、口令），在那句开口前收掉；没有就留到场景结束前一点
+K.chantAlpha = (t, sc) => {
+  const all = K.chantsOf(sc.id); if (!all.length) return 0;
+  const starts = all.filter(l => l.chant === 0).map(l => l.t0);
+  let gi = -1; for (let i = 0; i < starts.length; i++) if (t >= starts[i] - 0.05) gi = i;
+  if (gi < 0) return 0;
+  const end = gi + 1 < starts.length ? starts[gi + 1] : Infinity;
+  const last = Math.max(...all.filter(l => l.t0 >= starts[gi] - 1e-6 && l.t0 < end - 1e-6).map(l => l.t1));
+  const next = K.linesOf(sc.id).find(l => l.chant == null && l.t0 >= last - 1e-6 && l.t0 < end);
+  let a = gi + 1 >= starts.length ? 1 - ss(sc.t1 - 0.6, sc.t1 - 0.25, t) : 1;
+  if (next) a = Math.min(a, 1 - ss(next.t0 - 0.3, next.t0 - 0.05, t));
+  return a;
+};
 K.chantRow = (c, t, sc, col) => {
   const all = K.chantsOf(sc.id); if (!all.length) return;
   const starts = all.filter(l => l.chant === 0).map(l => l.t0);
   let gi = -1; for (let i = 0; i < starts.length; i++) if (t >= starts[i] - 0.05) gi = i;
   if (gi < 0) return;
   const words = all.filter(l => l.t0 >= starts[gi] - 1e-6 && (gi + 1 >= starts.length || l.t0 < starts[gi + 1] - 1e-6));
-  const fade = gi + 1 >= starts.length ? 1 - ss(sc.t1 - 0.6, sc.t1 - 0.25, t) : 1;
+  const fade = K.chantAlpha(t, sc);
   const card = K.LINES.find(l => l.scene === sc.id && l.card);
   col = col || (card && K.VOC[card.card.en] ? K.VOC[card.card.en].col : K.COL.teacher);
   const n = words.length, gap = Math.min(560, 1700 / n);
@@ -546,7 +600,8 @@ K.camFor = (t, sc, x, host = 'bobo') => {
   return { z: 1 + 0.06 * w, x: lerp(960, x, 0.22 * w), y: lerp(540, 600, w) };
 };
 K.withCam = (c, cam, fn) => {
-  const hw = 960 / cam.z, hh = 540 / cam.z, x = clamp(cam.x, hw, W - hw), y = clamp(cam.y, hh, H - hh);   // 推近时不露出画布外
+  const ww = cam.ww || W, wh = cam.wh || H;                                       // 世界宽高：宽场景（横摇）可以大于画布
+  const hw = 960 / cam.z, hh = 540 / cam.z, x = clamp(cam.x, hw, ww - hw), y = clamp(cam.y, hh, wh - hh);   // 推近时不露出画布外
   c.save(); c.translate(960, 540); c.scale(cam.z, cam.z); c.translate(-x, -y); fn(); c.restore();
 };
 // 原地跳一下：crouch → air → land
@@ -558,13 +613,17 @@ K.hopAt = (t, times, Hh = 170, air = 0.5) => {
   }
   return null;
 };
+// L 里的角色按 y 从小到大（后排先画）
+K.byDepth = L => Object.keys(L).filter(k => L[k] && typeof L[k] === 'object' && 'x' in L[k]).sort((a, b) => (L[a].y ?? 0) - (L[b].y ?? 0));
 // 一个问答场景：背景（bg 材质层）→ 角色（主画布）→ 前景（prop 材质层）→ 气泡，都在镜头里；单词卡和跟读行在镜头外。
 // layout(t) → { order: [角色…], <角色>: {x, y, pose?, …K.ch 的参数} 或 {draw: () => {top}}, front?(g) }
 K.qaScene = (c, t, sc, focus, drawBg, layout, cam, o = {}) => {
   const pos = {}, L = layout(t);
+  if (cam === 'auto') cam = K.camAt(t, K.shots(sc, L, focus), o.ww);             // 自动分镜（kids_stage.js）
+  const order = L.order || K.byDepth(L);
   K.withCam(c, cam || K.camFor(t, sc, L[focus] ? L[focus].x : 960), () => {
     K.layer(c, 'bg', g => drawBg(g, t));
-    for (const who of L.order) { const p = L[who]; const r = p.draw ? p.draw() : K.ch(c, who, p.x, p.y, t, p); pos[who] = { x: p.x, top: p.top ?? r.top, bx: p.bx }; }
+    for (const who of order) { const p = L[who]; const r = p.draw ? p.draw() : K.ch(c, who, p.x, p.y, t, p); pos[who] = { x: p.x, top: p.top ?? r.top, bx: p.bx }; }
     if (L.front) K.layer(c, 'prop', g => L.front(g));
     K.bubbles(c, t, sc, pos);
   });
@@ -596,6 +655,53 @@ K.title = (c, t, up, o = {}) => {
 };
 
 // ---------- 跟读环节 ----------
+// ---------- 等孩子的空拍：提示 ----------
+// script.json 的 {"rest": n, "wait": 种类}：say 说、do 一起做、point 指、guess 猜、pick 选、freeze 定住（true = say）
+K.WAIT_TEXT = { say: '轮到你说！', do: '站起来，一起做！', point: '用手指一指！', guess: '猜猜是什么？', pick: '选一个！', freeze: '定住！不许动！' };
+K.waitAt = t => K.WAITS.find(w => t >= w.t0 && t < w.t1) || null;
+// 在 ui 层的 g 上画：图标在 (x, y)，文字在 y+130，拍点在 y+215（freeze 不画拍点）。say 的样子和最早的跟读环节一模一样
+K.waitPrompt = (g, t, w, x, y, o = {}) => {
+  const kind = w.kind || 'say', col = o.col || K.COL.teacher, p = K.popIn(t, w.t0 - 0.1, 0.3);
+  const beat = clamp((t - w.t0) / K.BEAT, 0, 99), hit = Math.exp(-(beat % 1) * 6) * (t >= w.t0 ? 1 : 0);
+  if (kind === 'say') K.txt(g, '?', x, y + 10 * Math.sin(t * 8), 160 * p, K.EN, col, { stroke: TH.pal.textStroke, sw: 24 });
+  else {
+    g.save(); g.translate(x, y); g.scale(p, p);
+    g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = col; g.fillStyle = col;
+    const halo = () => { g.fillStyle = TH.pal.textStroke; g.beginPath(); g.arc(0, 0, 92, 0, 7); g.fill(); g.fillStyle = col; };
+    if (kind === 'do') {                                                           // 小人：每拍跳一下、举手
+      const j = -26 * hit; g.translate(0, j); halo(); g.lineWidth = 14;
+      g.beginPath(); g.arc(0, -52, 20, 0, 7); g.fill();
+      g.beginPath(); g.moveTo(0, -28); g.lineTo(0, 22); g.moveTo(0, -18); g.lineTo(-38, -52 - 10 * hit); g.moveTo(0, -18); g.lineTo(38, -52 - 10 * hit);
+      g.moveTo(0, 22); g.lineTo(-26, 66); g.moveTo(0, 22); g.lineTo(26, 66); g.stroke();
+    } else if (kind === 'point') {                                                 // 手指：往左上一戳一戳
+      const d = 10 * hit; g.translate(-d, -d); halo(); g.rotate(-0.6);
+      g.beginPath(); g.roundRect(-34, -6, 68, 64, 22); g.fill();
+      g.beginPath(); g.roundRect(-13, -74, 26, 84, 13); g.fill();
+      g.beginPath(); g.arc(-34, 16, 15, 0, 7); g.fill();                         // 大拇指
+    } else if (kind === 'guess') {                                                 // 问号：跟着鼓点越抖越快
+      const k = clamp((t - w.t0) / Math.max(0.1, w.t1 - w.t0)), sh = Math.sin(t * (20 + 50 * k)) * (0.05 + 0.15 * k);
+      g.rotate(sh); K.txt(g, '?', 0, 0, 190, K.EN, col, { stroke: TH.pal.textStroke, sw: 26 });
+    } else if (kind === 'pick') {                                                  // 左右两个箭头，交替跳
+      const side = Math.floor(beat) % 2 ? 1 : -1; halo();
+      for (const s of [-1, 1]) { const k = s === side ? 1 + 0.25 * hit : 1; g.save(); g.translate(s * 46, 0); g.scale(-s * k, k);
+        g.beginPath(); g.moveTo(26, -42); g.lineTo(-26, 0); g.lineTo(26, 42); g.closePath(); g.fill(); g.restore(); }
+    } else if (kind === 'freeze') {                                                // 雪花，不动
+      halo(); g.lineWidth = 12;
+      for (let i = 0; i < 6; i++) { g.save(); g.rotate(i * Math.PI / 3); g.beginPath(); g.moveTo(0, 0); g.lineTo(0, -74);
+        g.moveTo(0, -46); g.lineTo(-20, -64); g.moveTo(0, -46); g.lineTo(20, -64); g.stroke(); g.restore(); }
+    }
+    g.restore();
+  }
+  if (o.pill) {                                                                    // 深色场景：字和拍点后面垫一块浅色底
+    const tw = K.tw(g, K.WAIT_TEXT[kind], 54, K.ZH);
+    g.save(); g.globalAlpha *= p; g.fillStyle = TH.pal.pill; g.beginPath(); g.roundRect(x - tw / 2 - 36, y + 84, tw + 72, kind === 'freeze' ? 92 : 166, 40); g.fill(); g.restore();
+  }
+  K.txt(g, K.WAIT_TEXT[kind], x, y + 130, 54, K.ZH, col, { alpha: p });
+  if (kind === 'freeze') return;
+  const nb = Math.round((w.t1 - w.t0) / K.BEAT);
+  for (let k = 0; k < nb; k++) { const on = t >= w.t0 + k * K.BEAT; g.fillStyle = on ? col : 'rgba(122,76,255,0.2)'; g.beginPath(); g.arc(x + (k - (nb - 1) / 2) * 56, y + 215, on ? 18 : 14, 0, 7); g.fill(); }
+};
+
 // 老师问（quiz: 词）→ 留空拍给孩子答（rest + wait）→ Bobo 给标准答案（answer: 词，Yes 开头绿色对勾，否则红叉；
 // 答案不是 Yes/No 的句型（Where is…? → It's in the box!）传 o.good(answerLine) → true 显示对勾）。
 // o.pic(c, t, key)：左边的大图卡；o.react(answerLine|undefined) → 右下角陪答角色的 K.ch 参数（或 null 不画）
@@ -625,15 +731,9 @@ K.quiz = (c, t, sc, o = {}) => {
       K.txt(g, w2, 1370, 318, s2, K.EN, V.col, { stroke: TH.pal.textStroke, sw: s2 * 0.12 });
       K.txt(g, q.zh, 1370, 425, 50, K.ZH2, K.SUB);
       const w = a && K.WAITS.find(w => w.t0 >= q.t1 - 0.01 && w.t1 <= a.t0 + 0.01);
-      if (w && t >= w.t0 - 0.1 && t < a.t0) {                                       // 留给孩子回答的空拍
-        const p = K.popIn(t, w.t0 - 0.1, 0.3);
-        K.txt(g, '?', 1370, 590 + 10 * Math.sin(t * 8), 160 * p, K.EN, K.COL.teacher, { stroke: TH.pal.textStroke, sw: 24 });
-        K.txt(g, '轮到你说！', 1370, 720, 54, K.ZH, K.COL.teacher, { alpha: p });
-        const nb = Math.round((w.t1 - w.t0) / K.BEAT);
-        for (let k = 0; k < nb; k++) { const on = t >= w.t0 + k * K.BEAT; g.fillStyle = on ? K.COL.teacher : 'rgba(122,76,255,0.2)'; g.beginPath(); g.arc(1370 + (k - (nb - 1) / 2) * 56, 805, on ? 18 : 14, 0, 7); g.fill(); }
-      }
+      if (w && t >= w.t0 - 0.1 && t < a.t0) K.waitPrompt(g, t, w, 1370, 590);       // 留给孩子回答的空拍
       if (a && t >= a.t0 - 0.12) {
-        const p = K.popIn(t, a.t0 - 0.12, 0.35, 2.6), yes = o.good ? o.good(a) : /^yes/i.test(a.text);
+        const p = K.popIn(t, a.t0 - 0.12, 0.35, 2.6), yes = o.good ? o.good(a) : a.good ?? !/^\s*no\b/i.test(a.text);   // 不写 good：No 开头算错，其余算对
         const acol = yes ? TH.pal.yes : TH.pal.no, as = K.fitSize(g, a.text, K.EN, 700, 112);   // 长答案缩字号，不超出右半屏
         g.save(); g.translate(1370, 600); g.scale(p, p); g.rotate(yes ? -0.02 : 0.02);
         const bw = K.tw(g, a.text, as, K.EN) + 240;
@@ -658,7 +758,8 @@ K.quiz = (c, t, sc, o = {}) => {
 };
 
 // ---------- 整片：找场景、转场、收尾 ----------
-// SC: {场景 id: (c, t, sc) => …}。转场：彩色圆盖住旧画面，再从中间开一个洞露出新画面（颜色 cfg.wipe[下一场景]）
+// SC: {场景 id: (c, t, sc) => …}。转场：彩色圆盖住旧画面，再从中间开一个洞露出新画面（颜色 cfg.wipe[下一场景]）；
+// 场景写了 trans（地图、小火车等）时由 kids_trans.js 的 K.journey 接管
 K.frame = (c, t, SC) => {
   K.MAIN = c;
   const step = TH.step || 1;                                                       // 剪纸、黏土、蜡笔"一拍二"：每两帧换一次画面，像定格动画
@@ -668,14 +769,16 @@ K.frame = (c, t, SC) => {
   let i = SCN.findIndex(s => t < s.t1); if (i < 0) i = SCN.length - 1;
   const sc = SCN[i], next = SCN[i + 1], R = Math.hypot(960, 540) + 40;
   c.fillStyle = TH.paper; c.fillRect(0, 0, W, H);
-  const run = s => { if (!SC[s.id]) throw new Error(`场景 ${s.id} 没有画法（SC.${s.id}）`); SC[s.id](c, t, s); };
-  if (next && t > next.t0 - 0.32) {
-    run(sc);
+  const run = (s, cc = c, tt = t) => { if (!SC[s.id]) throw new Error(`场景 ${s.id} 没有画法（SC.${s.id}）`); SC[s.id](cc, tt, s); };
+  if (K.journey && K.journey(c, t, i, run)) { K.finish(c); return; }              // 旅程转场（kids_trans.js，台本里场景写了 trans）
+  const jr = s => !!(K.isJourney && K.isJourney(s));
+  if (next && t > next.t0 - 0.32 && !jr(next)) {
+    run(sc); if (K.owl) K.owl(c, t);
     const p = U.ease.in(clamp((t - (next.t0 - 0.32)) / 0.32));
     K.layer(c, 'ui', g => { g.fillStyle = K.WIPE[next.id] || K.INK; g.beginPath(); g.arc(960, 540, R * p, 0, 7); g.fill(); });
   } else {
-    run(sc);
-    if (i > 0 && t < sc.t0 + 0.4) {
+    run(sc); if (K.owl) K.owl(c, t);                                              // 猫头鹰老师在场景之上、换场圆之下
+    if (i > 0 && t < sc.t0 + 0.4 && !jr(sc)) {
       const p = U.ease.out(clamp((t - sc.t0) / 0.4));
       K.layer(c, 'ui', g => { g.fillStyle = K.WIPE[sc.id] || K.INK; g.beginPath(); g.rect(-40, -40, W + 80, H + 80); g.moveTo(960 + R * p, 540); g.arc(960, 540, R * p, 0, 7, true); g.fill('evenodd'); });
     }

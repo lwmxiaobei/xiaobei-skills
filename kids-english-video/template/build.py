@@ -12,13 +12,14 @@
 """
 import json
 import math
+import re
 import subprocess
 from pathlib import Path
 
 import numpy as np
 from scipy.io import wavfile
 
-from tts import take_path
+from tts import check_voices, take_path
 
 ROOT = Path(__file__).parent
 SR, FPS = 48000, 30
@@ -27,9 +28,12 @@ BEAT = 60 / S.get("bpm", 100)
 STYLES = ("flat", "crayon", "paper", "clay", "watercolor")
 if S.get("style", "flat") not in STYLES:
     raise SystemExit(f"script.json 的 style 只能是 {STYLES}")
-PAN = {"bobo": 0.0, "rabbit": -0.2, "fish": 0.2, "bird": 0.12, "teacher": 0.0} | S.get("pan", {})
+PAN = {"bobo": 0.0, "rabbit": -0.2, "fish": 0.2, "bird": 0.12, "teacher": 0.0,
+       "panda": -0.15, "elephant": 0.25, "frog": -0.3, "penguin": 0.3, "monkey": -0.1, "dino": 0.15} | S.get("pan", {})   # 声像：-1 左 … 1 右
 GAP = 0.15          # 上一句结束到下一句开口，至少隔这么久，再顺延到下一个拍点
 CHORUS_SPREAD = 0.025  # 齐声时每个声音错开的秒数，听起来像一群人在说
+WAIT_KINDS = ("say", "do", "point", "guess", "pick", "freeze")   # 等孩子的空拍：说、一起做、指、猜、选、定住（true 等于 say）
+TRANS_SFX = {"page": "pageflip", "bubbles": "pop", "slide": "slide_down", "train": "choo"}   # 换场音效，没写的转场用 whoosh
 
 
 def next_beat(t):
@@ -81,8 +85,9 @@ def take(who, text):
 
 
 def main():
+    check_voices(S)
     (ROOT / "build").mkdir(exist_ok=True)
-    clips, lines, acts, waits, scenes, sfx = [], [], [], [], [], []
+    clips, lines, acts, waits, scenes, sfx, stops = [], [], [], [], [], [], []
 
     def fx(name, at, gain=0.0):
         if not (ROOT / "sfx" / f"{name}.wav").exists():
@@ -91,18 +96,27 @@ def main():
     t = 0.0
     for sc in S["scenes"]:
         t = next_beat(t)
-        scene = {"id": sc["id"], "animal": sc.get("animal"), "t0": t}
+        scene = {k: v for k, v in sc.items() if k != "events"}   # round、bg 等字段原样交给画面
+        scene.setdefault("animal", None)
+        scene["t0"] = t
         for ev in sc["events"]:
             if "rest" in ev:
                 t0 = next_beat(t)
                 t = t0 + ev["rest"] * BEAT
                 if ev.get("wait"):
-                    waits.append({"t0": t0, "t1": t})
+                    kind = "say" if ev["wait"] is True else ev["wait"]
+                    if kind not in WAIT_KINDS:
+                        raise SystemExit(f"wait 只能是 true / {' / '.join(WAIT_KINDS)}，场景 {sc['id']} 写的是 {ev['wait']!r}")
+                    waits.append({"t0": t0, "t1": t, "kind": kind, "scene": sc["id"]})
+                if ev.get("music") == "stop":
+                    stops.append([t0, t])
                 continue
             if "act" in ev:
                 t0 = next_beat(t)
                 t = t0 + ev["beats"] * BEAT
                 acts.append({"act": ev["act"], "t0": t0, "t1": t, "scene": sc["id"]})
+                if ev.get("music") == "stop":
+                    stops.append([t0, t])
                 for e in ev.get("sfx", []):
                     fx(e["name"], t0 + e["beat"] * BEAT, e.get("gain", 0))
                 continue
@@ -119,7 +133,7 @@ def main():
                     end = max(end, at + off + len(y) / SR)
                 line = {"who": whos, "text": ev["say"], "zh": ev.get("zh", ""), "t0": round(at, 4), "t1": round(end, 4),
                         "scene": sc["id"]}
-                for key in ("card", "quiz", "answer"):
+                for key in ("card", "quiz", "answer", "good"):
                     if key in ev:
                         line[key] = ev[key]
                 if n > 1:
@@ -129,10 +143,19 @@ def main():
                 for e in ev.get("sfx", []):
                     fx(e["name"], (end if e.get("at") == "end" else at) + e.get("offset", 0), e.get("gain", 0))
                 t = end
+            if ev.get("music") == "stop":
+                stops.append([start, t])
         scene["t1"] = next_beat(t)
         t = scene["t1"]
         scenes.append(scene)
     total = scenes[-1]["t1"]
+    merged = []                                      # 伴奏停的时段：相隔不到 1 拍的连成一段
+    for a, b in sorted(stops):
+        if merged and a - merged[-1][1] < BEAT:
+            merged[-1][1] = max(merged[-1][1], b)
+        else:
+            merged.append([a, b])
+    stops = [[round(a, 4), round(b, 4)] for a, b in merged]
 
     # 人声音轨 + 每个角色的口型
     nS = int(SR * (total + 1))
@@ -142,7 +165,7 @@ def main():
     for c in clips:
         i = int(round(c["at"] * SR))
         y = c["y"] * c["gain"]
-        ang = (PAN[c["who"]] + 1) * math.pi / 4
+        ang = (PAN.get(c["who"], 0.0) + 1) * math.pi / 4
         m = min(len(y), nS - i)
         vo[i:i + m, 0] += y[:m] * math.cos(ang) * math.sqrt(2)
         vo[i:i + m, 1] += y[:m] * math.sin(ang) * math.sqrt(2)
@@ -156,30 +179,34 @@ def main():
 
     # 通用音效（画面里同样按这些时刻做动作）
     if S.get("auto_sfx", True):
-        for sc in scenes[1:]:
-            fx("whoosh", sc["t0"] - 0.28, -6)
+        for sc in scenes[1:]:                        # 换场：跟着转场（kids_trans.js）走，小火车在车开出来那一拍鸣笛
+            name = TRANS_SFX.get(sc.get("trans"), "whoosh")
+            fx(name, sc["t0"] if sc.get("trans") == "train" else sc["t0"] - 0.28, -6)
         for ln in lines:
             if "card" in ln:
                 fx("sparkle", ln["t0"] - 0.05, -4)
             if "answer" in ln:
-                fx("ding" if ln["text"].lower().startswith("yes") else "nope", ln["t0"] - 0.1, -6)
+                fx("ding" if ln.get("good", re.match(r"no\b", ln["text"].strip(), re.I) is None) else "nope", ln["t0"] - 0.1, -6)   # "good" 写明对错，不写时 No 开头算错、其余算对
             if "quiz" in ln:
                 fx("pop", ln["t0"] - 0.08, -8)
         for w in waits:
-            for b in range(int(round((w["t1"] - w["t0"]) / BEAT))):
-                fx("tick", w["t0"] + b * BEAT, -10)
+            if w["kind"] == "guess":                 # 猜：鼓点；定住：音乐停、什么都不加；其余每拍 tick
+                fx("drumroll", w["t0"], -6)
+            elif w["kind"] != "freeze":
+                for b in range(int(round((w["t1"] - w["t0"]) / BEAT))):
+                    fx("tick", w["t0"] + b * BEAT, -10)
     sfx.sort(key=lambda e: e["at"])
 
     tl = {"bpm": S.get("bpm", 100), "beat": BEAT, "total": round(total, 4), "scenes": scenes, "lines": lines, "acts": acts,
-          "waits": waits, "sfx": sfx}
+          "waits": waits, "stops": stops, "sfx": sfx}
     (ROOT / "build/timeline.json").write_text(json.dumps(tl, ensure_ascii=False, indent=1))
 
     assets = sorted(p.name for p in (ROOT / "代码工程/assets").glob("*.png"))
     spec = {"grammar": S["grammar"], "duration": round(total, 4), "fps": FPS, "width": 1920, "height": 1080,
             "cues": [{"kind": "asset", "at": 0, "image": f"assets/{a}"} for a in assets],
-            "data": {k: tl[k] for k in ("bpm", "beat", "scenes", "lines", "acts", "waits")} |
+            "data": {k: tl[k] for k in ("bpm", "beat", "scenes", "lines", "acts", "waits", "stops")} |
                     {"mouth": {w: "".join(map(str, m.tolist())) for w, m in mouths.items()}, "title": S["title"], "title_zh": S.get("title_zh", ""),
-                     "style": S.get("style", "flat")}}
+                     "style": S.get("style", "flat"), "owl": S.get("owl", True)}}
     (ROOT / "代码工程/spec.json").write_text(json.dumps(spec, ensure_ascii=False))
     print(f"画风 {S.get('style', 'flat')}，配乐 {S.get('music', 'ukulele')}")
     print(f"总长 {total:.2f}s，{len(lines)} 句，{len(clips)} 条 take，音效 {len(sfx)} 个")

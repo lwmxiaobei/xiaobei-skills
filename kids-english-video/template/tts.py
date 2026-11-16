@@ -23,8 +23,33 @@ def take_path(voice, text, k):
     return TAKES / f"{slug}_{k}_{h}.wav"
 
 
+# 新角色的推荐音色（Fish 公共音色），voices 里缺了就提示加这一项
+SUGGEST = {
+    "panda": {"id": "4fbed27c40e3465f98bc777fd0cc35ff", "name": "boy", "speed": 0.95},
+    "elephant": {"id": "d9ce1833c191476db346efb50aa20722", "name": "boy (low)", "speed": 0.95},
+    "frog": {"id": "b9011feb3c6f46ddaeb90043fab0eb4a", "name": "Kid", "speed": 1.05},
+    "penguin": {"id": "051eccd6d8894155a0c544b8e5c0fd72", "name": "Baby", "speed": 1.05},
+    "monkey": {"id": "829184c635314c9485e48690116ff8ad", "name": "Child voice boy", "speed": 1.1},
+    "dino": {"id": "ee2fa25a56364be9a80d0028eecc6ea4", "name": "Girl", "speed": 1.0},
+}
+
+
+def check_voices(script):
+    """台本里说话的角色都要在 voices 里有音色；缺了直接说在 voices 里加哪一项。"""
+    who = []
+    for sc in script["scenes"]:
+        for ev in sc["events"]:
+            if "say" in ev:
+                who += ev["who"] if isinstance(ev["who"], list) else [ev["who"]]
+    miss = sorted({w for w in who if w not in script.get("voices", {})})
+    if miss:
+        eg = ", ".join(f'"{w}": ' + json.dumps(SUGGEST.get(w, {"id": "<Fish 音色 id>", "name": w, "speed": 1.0}), ensure_ascii=False) for w in miss)
+        raise SystemExit(f"script.json 的 voices 里没有 {'、'.join(json.dumps(w) for w in miss)}：在 voices 里加 {eg}（各角色的推荐音色见 references/script-format.md）")
+
+
 def jobs(script):
     """(说话人, 文字, 第几条, 路径) 列表；同一个人同一句话在全片里第 n 次出现就用第 n 条 take，听起来不会一模一样。"""
+    check_voices(script)
     seen, out = {}, []
     for sc in script["scenes"]:
         for ev in sc["events"]:

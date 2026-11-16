@@ -81,6 +81,7 @@ def main():
     if music is None:
         final(ROOT / "out/成片.mp4", False)
         return
+    music = bgm.mute_spans(music, TL.get("stops", []))     # 木头人等："music": "stop" 的时段伴奏静音
     wavfile.write(MIX / "bgm.wav", SR, music)
     final(ROOT / "out/成片.mp4", True)
     final(ROOT / "out/成片_无背景音乐.mp4", False)

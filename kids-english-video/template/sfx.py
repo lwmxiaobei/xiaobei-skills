@@ -189,12 +189,75 @@ def gulp():
     return tone(160 + 380 * (t / d) ** 2, d) * env(d, 0.004, 0.05)
 
 
+def drumroll():
+    """猜猜看的空拍：军鼓滚奏 1.5 秒渐强，末尾一记重击。"""
+    d, hits = 1.7, []
+    for i in range(int(1.5 / 0.045)):
+        k = i * 0.045 / 1.5
+        hits.append((i * 0.045, band(noise(0.05), 1200, 7000) * env(0.05, 0.001, 0.018) * (0.25 + 0.75 * k)))
+    hits.append((1.5, band(noise(0.2), 150, 5000) * env(0.2, 0.002, 0.06) * 1.6 + tone(110, 0.2) * env(0.2, 0.002, 0.08)))
+    y = mix(*hits)
+    return y[:int(SR * d)]
+
+
+def tada():
+    """揭晓：两个上行大三和弦。"""
+    def chord(root, d):
+        return sum(tone(root * r, d, "tri") for r in (1, 1.26, 1.5, 2)) * env(d, 0.006, d * 0.5)
+    return mix((0, chord(523, 0.18)), (0.16, chord(784, 0.7)))
+
+
+def clap():
+    """拍手：两三层很短的噪声叠在一起。"""
+    return mix(*[(k * 0.008, band(noise(0.09), 900, 5000) * env(0.09, 0.0008, 0.02)) for k in range(3)])
+
+
+def freeze():
+    """定住：玩具停摆的下行滑音，最后咔嗒一声。"""
+    d = 0.42
+    t = t_(d)
+    f = 880 * (180 / 880) ** (t / d)
+    y = tone(f, d, "tri") * env(d, 0.004, None) * 0.8
+    return mix((0, y), (d, band(noise(0.06), 2000, 8000) * env(0.06, 0.0005, 0.01)))
+
+
+def magnify():
+    """放大镜找到：上行闪烁的铃音。"""
+    return mix(*[(k * 0.07, tone(1200 * 1.122 ** k, 0.25) * env(0.25, 0.002, 0.08) * 0.6) for k in range(6)])
+
+
+def poof():
+    """变烟：低通噪声"噗"一声。"""
+    d = 0.4
+    return low(noise(d), 900) * env(d, 0.01, 0.09) * 3
+
+
+def choo():
+    """小火车：两声汽笛（三个音的和弦，带一点颤音），后面跟四下"嚓嚓"。"""
+    def whistle(d):
+        t = t_(d)
+        vib = 1 + 0.006 * np.sin(2 * np.pi * 6 * t)
+        return sum(tone(f * vib, d, "tri") for f in (587, 740, 880)) * env(d, 0.03, None) * 0.5
+    chug = [(0.62 + k * 0.13, band(noise(0.09), 400, 3000) * env(0.09, 0.002, 0.03) * (1 - 0.15 * k)) for k in range(4)]
+    return mix((0, whistle(0.24)), (0.3, whistle(0.3)), *chug)
+
+
+def pageflip():
+    """翻页：一声"唰"，噪声先亮后暗。"""
+    d = 0.32
+    t = t_(d)
+    x = band(noise(d), 1500, 9000) * np.sin(np.pi * t / d) ** 2
+    return x + band(noise(d), 300, 1200) * np.sin(np.pi * t / d) ** 3 * 0.4
+
+
 SOUNDS = {
     "boing": boing, "splash": splash, "flutter": flutter, "flap": flap, "whoosh": whoosh, "sparkle": sparkle,
     "twinkle": twinkle, "ding": ding, "nope": nope, "pop": pop, "tick": tick, "step": step, "thud": thud,
     "giggle": giggle, "slide_up": lambda: slide(300, 1100, 2.6), "slide_down": lambda: slide(1200, 220, 0.45),
     "crunch": crunch, "crisp": lambda: crunch(1800, 9000, 3, 0.035), "munch": munch, "yuck": yuck, "gulp": gulp,
     "wow": lambda: slide(420, 1250, 0.5),
+    "drumroll": drumroll, "tada": tada, "clap": clap, "freeze": freeze, "magnify": magnify, "poof": poof,
+    "choo": choo, "pageflip": pageflip,
 }
 
 

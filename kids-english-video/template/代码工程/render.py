@@ -26,6 +26,7 @@ ap.add_argument('--no-counter', action='store_true', help='--solo 时不画角�
 ap.add_argument('--crf', type=int, default=14)
 ap.add_argument('--spec', help='参数化片段 spec.json（走 clip.html，不读段落表）')
 ap.add_argument('--alpha', action='store_true', help='--spec 时出 ProRes 4444 带透明（背景不画）')
+ap.add_argument('--eval', help='测试用：启动完成后在页面里执行这个 JS 文件（一个表达式），打印一行 EVAL_RESULT <json>，不出图')
 a = ap.parse_args()
 
 root = Path(__file__).parent
@@ -79,7 +80,9 @@ with sync_playwright() as p:
     grab = '''async (t)=>{ await window.prepare(t); window.renderFrame(t); return window.__canvas.toDataURL('image/png').split(',')[1]; }'''
     if a.solo:
         grab = '''async (t)=>{ window.renderSolo(%s, t, {counter: %s}); return window.__canvas.toDataURL('image/png').split(',')[1]; }''' % (repr(a.solo), 'false' if a.no_counter else 'true')
-    if a.stills:
+    if a.eval:
+        print('EVAL_RESULT ' + json.dumps(pg.evaluate(Path(a.eval).read_text()), ensure_ascii=False), flush=True)
+    elif a.stills:
         out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
         for s in a.stills.split(','):
             (out / f't{float(s):06.2f}.png').write_bytes(base64.b64decode(pg.evaluate(grab, float(s))))

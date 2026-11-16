@@ -30,7 +30,7 @@ kids-english-video/
 │   ├── prep_assets.py        切好的图 → 素材（去底色边、统一身高、对齐）
 │   ├── 角色/gen_img.sh       Codex 生图
 │   └── 代码工程/             渲染器：clip.html + lib/kids.js（画面库 K）+ clips/<本集>.js（本集画面）
-├── characters/<画风>/        五种画风的基础角色帧、设定稿 lineup.jpg、画风提示词 style_prompt.txt
+├── characters/<画风>/        五种画风的角色帧（4 个主角、6 个客串动物、猫头鹰老师）、设定稿 lineup.jpg / lineup_guests.jpg、画风提示词 style_prompt.txt
 ├── assets/画风总览.jpg        五种画风同一画面的对比（每行一种：扁平、蜡笔、剪纸、黏土、水彩）
 ├── scripts/new_episode.py    新建一集
 ├── scripts/preview_styles.py 渲画风预览（调画风参数后检查用）
@@ -42,11 +42,22 @@ kids-english-video/
 ### 0. 定内容、画风、配乐
 
 - **内容**：一个句型（Can you hop? / Do you like carrots? / Where is the cat? / What color is it?…）+ 4 个具体、能画出来的单词 + 一个反转 + 一道荒唐题。句子短，3–6 岁能跟。用户只给了主题时自己定，写进台本前用一两句话说给用户听。
+- **玩法**：每一轮选一种玩法（`lib/kids_rounds.js`，表和写法见 `references/scene-cookbook.md` 的「玩法」一节），混搭规则：
+  1. 第 1 轮用标准问答 `qa` 把句型立住，后面每轮换一种，同一集里不重复。
+  2. 中间插一个动起来的环节：木头人 `freeze` 或跟我做 `doit`。
+  3. 每轮都保留"单词卡 + 领念 3 遍"。和 Bobo 齐念 3 遍可以省掉，有孩子动作的玩法用动作环节代替它。
+  4. 按单词挑玩法：名词用猜猜看、找一找、少了什么；动作用跟我做；颜色、形容词、Yes/No 用二选一；复数、数字用数一数。
+  5. 反转和跟读保留。片长不超过 3 分钟。
+
+- **场景和转场**：每轮放在一个不同的地方（台本 `"bg"`，9 个：草地、海边、雪地、夜晚、森林、厨房、卧室、游乐场、海底），按单词挑：吃的放厨房或草地野餐，水里的放海底或海边，睡觉、玩具放卧室，动作放游乐场。换场用地图当主线（`"trans": "map"`，Bobo 在地图上一站站跳过去，孩子知道"我们走到哪了"），中间穿插一两次小火车、滑梯、泡泡、开门、翻页。地图和小火车那一场开头加 `{"act": "travel", "beats": 4}`。写法见 `references/scene-cookbook.md` 的「场景」「转场」两节。
+
+  选好以后连同内容一起，用一两句话说给用户听。
+- **角色**：除了四个主角，可以请客串动物（熊猫、大象、青蛙、企鹅、小猴、小恐龙，五种画风都有帧和配音），按单词挑（企鹅放雪地、青蛙放池塘边），一集请两三个就够。老师说话时猫头鹰老师自动出现，不用写。角色和帧表见 `references/characters.md`。
 - **画风、配乐**：用户没说就问一次（AskUserQuestion），把 `assets/画风总览.jpg` 发给用户看。
 
 | 画风 `style` | 样子 | 英文字体 | 速度 |
 |---|---|---|---|
-| `flat` 扁平矢量 | 干净色块，最快，素材最全（前两集的吃东西、跳、跑等动作帧都有） | Lilita One | 每帧约 4 ms |
+| `flat` 扁平矢量 | 干净色块，最快，素材最全（吃东西、跳、跑等动作帧都有） | Lilita One | 每帧约 4 ms |
 | `crayon` 蜡笔手绘 | 蜡笔笔触、纸纹、描边抖动，一拍二 | Gochi Hand | 约 200 ms |
 | `paper` 剪纸拼贴 | 纸片投影、毛边、纸纤维，一拍二 | Lilita One | 约 180 ms |
 | `clay` 3D 黏土 | 鼓起来的高光暗部、软投影、暗角，一拍二 | Lilita One | 约 150 ms |
@@ -66,7 +77,7 @@ kids-english-video/
 python3 ~/.claude/skills/kids-english-video/scripts/new_episode.py <项目目录> --style crayon --music musicbox --grammar whereis --title "Where Is the Cat?" --title-zh "小猫在哪里？"
 ```
 
-复制模板、该画风的基础角色帧（4 个角色 × 闭嘴/半张/大张嘴、挥手、大笑、欢呼）、设定稿和画风提示词，建 `.venv`（uv，Python 3.12），生成音效。`--example` 原样复制示范集（扁平风素材齐全，可以直接跑通全流程当参照）。项目目录放在用户的视频目录下，按 `日期-片名` 命名。
+复制模板、该画风的全部角色帧（主角和客串动物的闭嘴/半张/大张嘴、挥手、大笑、欢呼等）、设定稿和画风提示词，建 `.venv`（uv，Python 3.12），生成音效。`--example` 原样复制示范集（扁平风素材齐全，可以直接跑通全流程当参照）。项目目录放在用户的视频目录下，按 `日期-片名` 命名。
 
 ### 2. 写台本 `script.json`
 
@@ -76,7 +87,7 @@ python3 ~/.claude/skills/kids-english-video/scripts/new_episode.py <项目目录
 
 基础帧只有站着说话、挥手、大笑、欢呼。本集的物品（食物、动物、颜色物件）和特殊动作（吃、找、躲、指）要按选定画风生成。流程、提示词写法、切图和对齐见 `references/characters.md`。要点：
 
-- 参考图用项目里的 `角色/设定稿/全员.jpg`，提示词末尾直接拼 `角色/画风提示词.txt`（画风段 + 品红底段）。
+- 参考图用项目里的 `角色/设定稿/全员.jpg`（画客串动物、猫头鹰时加上 `客串.jpg`），提示词末尾直接拼 `角色/画风提示词.txt`（画风段 + 品红底段）。
 - 品红底 #FF00FF（绿色物品不能用绿幕）。`gen_img.sh` 可以后台并行跑几张。
 - 切图 `代码工程/cut.py 表.png --out 角色/切图/<前缀> --mode flat --tol 60`，再 `prep_assets.py` 去边、按已有帧身高缩放、按下半身对齐。
 - 生完一定打开看：Codex 偶尔漏画、多画、画成别的姿势，切图偶尔把两个角色并成一块。
@@ -87,7 +98,7 @@ python3 ~/.claude/skills/kids-english-video/scripts/new_episode.py <项目目录
 .venv/bin/python tts.py
 ```
 
-Fish Audio `s2.1-pro-free`，音色 ID 在 script.json `voices` 里（沿用前两集：Bobo、兔子、鱼、小鸟、老师）。API key 沿用 manim-explainer-video 技能的查找顺序，不要打印 key。每条按音色+文字+序号缓存，改哪句只重合成哪句；某条读得不好就删掉 `audio/takes/` 里那个文件再跑。合成完挑几条听（或用 mlx-whisper 转写核对），尤其是感叹词。
+Fish Audio `s2.1-pro-free`，音色 ID 在 script.json `voices` 里（模板带齐 4 个主角、老师和 6 个客串动物，推荐音色表在 `references/script-format.md`）。API key 沿用 manim-explainer-video 技能的查找顺序，不要打印 key。每条按音色+文字+序号缓存，改哪句只重合成哪句；某条读得不好就删掉 `audio/takes/` 里那个文件再跑。合成完挑几条听（或用 mlx-whisper 转写核对），尤其是感叹词。
 
 ### 5. 编排
 
@@ -99,7 +110,7 @@ Fish Audio `s2.1-pro-free`，音色 ID 在 script.json `voices` 里（沿用前�
 
 ### 6. 写本集画面 `代码工程/clips/<grammar>.js`
 
-从示范集 `doyoulike.js` 改（new_episode.py 已经复制好、改了名）。画面库 K 提供了草地、池塘、树、野餐布、气泡、单词卡、领念行、跟读环节、镜头、转场、片头标题，场景代码主要是摆角色、写每个场景特有的小动作。API 和规则见 `references/scene-cookbook.md`。最重要的一条：**代码画的东西放进 `K.layer(c, kind, g => …)` 里用 g 画**，画风材质（蜡笔、剪纸、黏土、水彩）才会加上；扁平风下它直接画，不影响。
+从示范集 `doyoulike.js` 改（new_episode.py 已经复制好、改了名）。画面库 K 提供了草地、池塘、树、野餐布、气泡、单词卡、领念行、跟读环节、镜头、转场、片头标题，场景代码主要是摆角色、写每个场景特有的小动作。每轮的玩法用 `K.rounds.<玩法>(c, t, sc, cfg)` 一句话接上，自动分镜、提示语、揭晓、音效时机都在里面，场景只给背景、站位和物品。API 和规则见 `references/scene-cookbook.md`。最重要的一条：**代码画的东西放进 `K.layer(c, kind, g => …)` 里用 g 画**，画风材质（蜡笔、剪纸、黏土、水彩）才会加上；扁平风下它直接画，不影响。
 
 改完先抽帧看：
 

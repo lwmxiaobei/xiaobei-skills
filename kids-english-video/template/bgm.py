@@ -263,6 +263,15 @@ def chiptune(nb, beat, L):
 ARRANGE = {"ukulele": ukulele, "musicbox": musicbox, "march": march, "chiptune": chiptune}
 
 
+def mute_spans(x, spans, sr=SR, fade=0.06):
+    """伴奏在 spans（[[开始秒, 结束秒], …]）里静音：开始前 fade 秒线性淡出，结束后 fade 秒线性淡入。返回新数组。"""
+    g = np.ones(len(x), np.float32)
+    t = np.arange(len(x)) / sr
+    for a, b in spans:
+        g = np.minimum(g, np.clip(np.maximum((a - t) / fade, (t - b) / fade), 0, 1))
+    return x * (g[:, None] if x.ndim == 2 else g)
+
+
 def generate(total, style="ukulele", bpm=100):
     """返回 (样本数, 2) 的 float32 伴奏，均方根约 -20 dBFS；style="none" 返回 None。"""
     global rng

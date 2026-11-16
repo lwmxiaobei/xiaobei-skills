@@ -20,6 +20,16 @@ SC.demo = (c, t, sc) => {
   }));
   K.chorusBanner(c, t, sc, 150);
 };
+// 场景预览（preview_styles.py --places）：场景 id 就是场景名，Bobo、兔子站左右，小鸟站在高处
+for (const name of Object.keys(K.PLACES || {})) SC[name] = (c, t, sc) => {
+  const P = K.place(name), amb = K.ambT(t), S = P.spots, hi = Object.keys(S).find(k => !['left', 'right', 'back'].includes(k));
+  K.layer(c, 'bg', g => P.bg(g, t, amb));
+  K.ch(c, 'bobo', S.left.x, S.left.y, t, { s: 0.95 * S.left.s, pose: 'bobo_wave' });
+  K.ch(c, 'rabbit', S.right.x, S.right.y, t, { s: 0.95 * S.right.s, phase: 0.1 });
+  K.ch(c, 'bird', S[hi].x, S[hi].y, t, { s: 0.78 * S[hi].s, phase: 0.2 });
+  if (P.frontTop != null) K.layer(c, 'prop', g => P.front(g, t, amb), { top: P.frontTop });
+  K.layer(c, 'ui', g => K.banner(g, P.en, P.zh, 110, 1, K.INK, 80));
+};
 return {
   fonts: K.fonts,
   init(ctx) { K.init(ctx, { vocab: VOCAB, colors: COL, scale: SCALE }); GY = K.GY; },

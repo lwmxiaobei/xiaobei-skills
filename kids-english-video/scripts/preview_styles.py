@@ -5,6 +5,8 @@
   python3 preview_styles.py --out <目录> [--styles flat,crayon,paper,clay,watercolor] [--times 1.2,2.9,3.9,6.2] [--sheet]
   --sheet 另外把所有图拼成一张总览 <目录>/总览.jpg（每行一个画风）
   --video 2 另外渲一段 2 秒的视频测渲染速度
+  --places 改成场景预览：9 个场景各 1.2 秒、各抽一帧（--sheet 拼成每行一个场景、每列一个画风）
+  --profile 在页面里测每个场景的纯绘制时间（每个场景连画 8 个重画帧取平均），打印画风 × 场景的毫秒表
 需要 uv（跑 playwright）。画面代码用 skill 模板里的 代码工程/（clips/preview.js + lib/kids.js），角色帧用 characters/<画风>/。
 """
 import argparse
@@ -18,6 +20,45 @@ from pathlib import Path
 SK = Path(__file__).resolve().parent.parent
 ENG = SK / "template/代码工程"
 FPS, BEAT = 30, 0.6
+
+
+PLACES = ["meadow", "beach", "snow", "night", "forest", "kitchen", "bedroom", "playground", "underwater"]
+PD = 1.2
+
+
+def places_spec(style, out):
+    n = int(len(PLACES) * PD * FPS) + 2
+    ch = SK / "characters" / style
+    spec = {"grammar": "preview", "duration": len(PLACES) * PD, "fps": FPS, "width": 1920, "height": 1080,
+            "cues": [{"kind": "asset", "at": 0, "image": str(p)} for p in sorted(ch.glob("*.png"))],
+            "data": {"bpm": 100, "beat": BEAT, "scenes": [{"id": p, "t0": round(i * PD, 3), "t1": round((i + 1) * PD, 3)} for i, p in enumerate(PLACES)],
+                     "lines": [], "acts": [], "waits": [], "mouth": {w: "0" * n for w in ("bobo", "rabbit", "fish", "bird", "teacher")},
+                     "title": "", "title_zh": "", "style": style}}
+    p = out / f"spec_places_{style}.json"
+    p.write_text(json.dumps(spec, ensure_ascii=False))
+    return p
+
+
+PROF_JS = """(async () => {
+  const out = {}, cv = window.__canvas, cx = cv.getContext('2d'), step = (K.TH.step || 1) / 30;
+  const draw = async t => { await window.prepare(t); window.renderFrame(t); cx.getImageData(0, 0, 1, 1); };
+  for (const s of K.SCN) {
+    const t0 = (s.t0 + s.t1) / 2 - 4 * step; await draw(t0);
+    const a = performance.now(); for (let i = 1; i <= 8; i++) await draw(t0 + i * step * 0.999);
+    out[s.id] = Math.round((performance.now() - a) / 8);
+  }
+  return out;
+})()"""
+
+
+def profile(style, out):
+    sp = places_spec(style, out)
+    js = out / "prof.js"
+    js.write_text(PROF_JS)
+    r = subprocess.run(["uv", "run", "-q", "--with", "playwright==1.59.0", "python", "render.py", "--spec", str(sp), "--out", "/dev/null", "--eval", str(js)],
+                       cwd=ENG, capture_output=True, text=True)
+    m = [l for l in r.stdout.splitlines() if l.startswith("EVAL_RESULT ")]
+    return json.loads(m[0][12:]) if m else {"错误": (r.stdout + r.stderr)[-600:]}
 
 
 def spec_for(style, out):
@@ -42,8 +83,8 @@ def spec_for(style, out):
     return p
 
 
-def render(style, out, times, video):
-    sp = spec_for(style, out)
+def render(style, out, times, video, places=False):
+    sp = places_spec(style, out) if places else spec_for(style, out)
     cmd = ["uv", "run", "-q", "--with", "playwright==1.59.0", "python", "render.py", "--spec", str(sp)]
     r = subprocess.run(cmd + ["--out", str(out / style), "--stills", times], cwd=ENG, capture_output=True, text=True)
     if r.returncode:
@@ -64,19 +105,32 @@ def main():
     ap.add_argument("--times", default="1.2,2.9,3.9,6.2")
     ap.add_argument("--sheet", action="store_true")
     ap.add_argument("--video", type=float, default=0)
+    ap.add_argument("--places", action="store_true")
+    ap.add_argument("--profile", action="store_true")
     a = ap.parse_args()
     out = Path(a.out).expanduser().resolve(); out.mkdir(parents=True, exist_ok=True)
     styles = a.styles.split(",")
+    if a.profile:                                       # 测速一个画风一个画风来，免得互相抢 CPU
+        res = {s: profile(s, out) for s in styles}
+        print("场景".ljust(12) + "".join(s.rjust(12) for s in styles))
+        for p in PLACES:
+            print(p.ljust(12) + "".join(str(res[s].get(p, "-")).rjust(12) for s in styles))
+        (out / "测速.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
+        return
+    if a.places:
+        a.times = ",".join(f"{(i + 0.5) * PD:.2f}" for i in range(len(PLACES)))
     with ThreadPoolExecutor(len(styles)) as ex:
-        for msg in ex.map(lambda s: render(s, out, a.times, a.video), styles):
+        for msg in ex.map(lambda s: render(s, out, a.times, a.video, a.places), styles):
             print(msg, flush=True)
     if a.sheet:
         from PIL import Image
         ts = [f"t{float(t):06.2f}.png" for t in a.times.split(",")]
         tw, th = 640, 360
-        sheet = Image.new("RGB", (tw * len(ts), th * len(styles)), "white")
-        for i, s in enumerate(styles):
-            for j, t in enumerate(ts):
+        rows, cols = (ts, styles) if a.places else (styles, ts)
+        sheet = Image.new("RGB", (tw * len(cols), th * len(rows)), "white")
+        for i, r in enumerate(rows):
+            for j, c in enumerate(cols):
+                s, t = (c, r) if a.places else (r, c)
                 f = out / s / t
                 if f.exists():
                     sheet.paste(Image.open(f).convert("RGB").resize((tw, th), Image.LANCZOS), (j * tw, i * th))

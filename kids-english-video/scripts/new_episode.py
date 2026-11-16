@@ -9,7 +9,7 @@
 画风：flat 扁平矢量 / crayon 蜡笔手绘 / paper 剪纸拼贴 / clay 3D 黏土 / watercolor 水彩绘本
 配乐：ukulele 尤克里里 / musicbox 音乐盒 / march 玩具进行曲 / chiptune 8-bit / none 不要
 项目里：
-  代码工程/assets/      该画风的基础帧（4 个角色 × m0 m1 m2 wave laugh cheer），扁平风另有前两集的全部动作帧
+  代码工程/assets/      该画风的基础帧（4 个角色 × m0 m1 m2 wave laugh cheer），扁平风另有吃、跳、跑等动作帧
   角色/设定稿/全员.jpg   该画风的设定稿，生新动作表时当参考图
   角色/画风提示词.txt    该画风的提示词段落（Art style + Background），新提示词直接拼进去
   clips/<grammar>.js    本集画面（从示范集复制改名，等着改）
@@ -58,6 +58,8 @@ def main():
     (dst / "角色/动作").mkdir(parents=True, exist_ok=True)
     (dst / "角色/切图").mkdir(parents=True, exist_ok=True)
     shutil.copy(ch / "lineup.jpg", dst / "角色/设定稿/全员.jpg")
+    if (ch / "lineup_guests.jpg").exists():
+        shutil.copy(ch / "lineup_guests.jpg", dst / "角色/设定稿/客串.jpg")      # 7 个新角色（客串动物和猫头鹰）
     shutil.copy(ch / "style_prompt.txt", dst / "角色/画风提示词.txt")
 
     s = json.loads((dst / "script.json").read_text())
@@ -75,6 +77,8 @@ def main():
     text = (dst / "script.json").read_text()
     for k in ("style", "music", "grammar", "title", "title_zh"):                 # 只换开头这几个字段，保留每个事件一行的排版
         text = re.sub(rf'^  "{k}": .*?,$', f'  "{k}": {json.dumps(s[k], ensure_ascii=False)},', text, count=1, flags=re.M)
+    if not a.example:                                                           # 示范集关着猫头鹰老师（画面和升级前逐像素一致），新的一集默认开
+        text = re.sub(r'^  "owl": false,\n', '', text, count=1, flags=re.M)
     (dst / "script.json").write_text(text)
 
     if not a.no_venv:

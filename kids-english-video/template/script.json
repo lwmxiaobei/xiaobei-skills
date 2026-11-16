@@ -5,12 +5,19 @@
   "style": "flat",
   "music": "ukulele",
   "bpm": 100,
+  "owl": false,
   "voices": {
     "bobo": {"id": "4fcb3a423c61415fb35604eba567d95f", "name": "Energetic Child", "speed": 1.0},
     "rabbit": {"id": "88aef4a31fd94aaa874c32252245b43f", "name": "Cute child!", "speed": 1.0},
     "fish": {"id": "0c0f9d7d87e44e2dabb53ebb092f5f53", "name": "Child (inquisitive boy)", "speed": 1.05},
     "bird": {"id": "4e407b98cb034f74b3863ec33c567c83", "name": "Child (cheerful girl)", "speed": 1.1},
-    "teacher": {"id": "73b5c16a6e504d6a97868581ada2b8d3", "name": "Teacher", "speed": 0.95}
+    "teacher": {"id": "73b5c16a6e504d6a97868581ada2b8d3", "name": "Teacher", "speed": 0.95},
+    "panda": {"id": "4fbed27c40e3465f98bc777fd0cc35ff", "name": "boy", "speed": 0.95},
+    "elephant": {"id": "d9ce1833c191476db346efb50aa20722", "name": "boy (low)", "speed": 0.95},
+    "frog": {"id": "b9011feb3c6f46ddaeb90043fab0eb4a", "name": "Kid", "speed": 1.05},
+    "penguin": {"id": "051eccd6d8894155a0c544b8e5c0fd72", "name": "Baby", "speed": 1.05},
+    "monkey": {"id": "829184c635314c9485e48690116ff8ad", "name": "Child voice boy", "speed": 1.1},
+    "dino": {"id": "ee2fa25a56364be9a80d0028eecc6ea4", "name": "Girl", "speed": 1.0}
   },
   "scenes": [
     {"id": "intro", "events": [

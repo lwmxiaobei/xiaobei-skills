@@ -1,26 +1,47 @@
 """Fish Audio 合成（公共音色，按 reference_id 调用）。
 
-API key 沿用 manim-explainer-video 技能的查找顺序（环境变量 → 项目 .env → fish.env → ai-video-platform 的 .env.local），不打印 key。
+API key 按顺序找：环境变量 FISH_AUDIO_API_KEY / FISH_API_KEY → 项目目录的 .env、.env.local →
+~/.config/kids-english-video/fish.env（写一行 FISH_API_KEY=...）。不打印 key。
 """
-import sys
 import http.client
+import os
+import re
 import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 
-sys.path.insert(0, str(Path("~/.claude/skills/manim-explainer-video/scripts").expanduser()))
-from fish_tts import api_key  # noqa: E402
-
 API = "https://api.fish.audio/v1/tts"
 MODEL = "s2.1-pro-free"
+KEY_NAMES = ("FISH_AUDIO_API_KEY", "FISH_API_KEY")
+KEY_FILES = (".env", ".env.local", "~/.config/kids-english-video/fish.env")
+
+
+def api_key(root):
+    """返回 (key, 来源)；找不到返回 (None, None)。相对路径按 root（项目目录）算。"""
+    for name in KEY_NAMES:
+        v = os.environ.get(name, "").strip()
+        if v:
+            return v, f"环境变量 {name}"
+    for f in KEY_FILES:
+        p = Path(f).expanduser()
+        p = p if p.is_absolute() else Path(root) / p
+        if not p.is_file():
+            continue
+        for line in p.read_text(errors="ignore").splitlines():
+            m = re.match(r"\s*(?:export\s+)?(?:FISH_AUDIO_API_KEY|FISH_API_KEY)\s*=\s*(.+)", line)
+            if m:
+                v = m.group(1).split(" #")[0].strip().strip("\"'")
+                if v:
+                    return v, str(p)
+    return None, None
 
 
 def synth(text, voice, out, speed=1.0, model=MODEL):
     import msgpack
     key, _ = api_key(Path(__file__).parent)
     if not key:
-        raise RuntimeError("找不到 Fish Audio API key")
+        raise RuntimeError("找不到 Fish Audio API key：设环境变量 FISH_API_KEY，或在项目 .env、~/.config/kids-english-video/fish.env 里写 FISH_API_KEY=...")
     payload = {
         "text": text,
         "reference_id": voice,

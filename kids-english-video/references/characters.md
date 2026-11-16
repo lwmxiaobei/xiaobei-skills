@@ -8,18 +8,33 @@
 - **兔子**（`rabbit`）：浅粉色，站着，比 Bobo 高一点，长耳朵内侧玫粉色，白色圆嘴套两颗门牙，白肚皮，大脚。
 - **鱼**（`fish`）：天蓝色圆鱼，三分之四侧面朝向观众，身上深蓝圆点，宝蓝色扇形大尾巴和小鳍，浮在离地一点的地方。
 - **小鸟**（`bird`）：最小，阳光黄的圆小鸡，头顶三根小羽毛，橙色三角嘴，金黄色小翅膀，细橙腿，粉脸蛋。
-- **老师**（`teacher`）：只有声音，画面上用紫色（`#7A4CFF`）代表。
+- **老师**（`teacher`）：配音是老师的声音，画面上是猫头鹰老师 `owl`（见下），台本 `"owl": false` 时只有声音，用紫色（`#7A4CFF`）代表。
 
-设定稿（四个角色一排）在 `characters/<画风>/lineup.jpg`，new_episode.py 复制到项目的 `角色/设定稿/全员.jpg`。生任何新图都把它当参考图。
+客串动物 6 个，哪一集要就请哪个：
+
+- **熊猫**（`panda`）：胖乎乎的黑白熊猫宝宝，黑眼圈、黑耳朵、黑胳膊腿。
+- **大象**（`elephant`）：粉蓝灰色的小象，粉色内衬的大耳朵，短鼻子末端往上卷。最高的一个。
+- **青蛙**（`frog`）：青柠绿的青蛙，鼓鼓的大眼睛长在头顶。最矮的一个。
+- **企鹅**（`penguin`）：圆滚滚的企鹅宝宝，背和头是深海军蓝（不是紫色），白脸白肚皮，橙色嘴和脚。
+- **小猴**（`monkey`）：巧克力棕的小猴，米色脸，螺旋形尾巴。
+- **小恐龙**（`dino`）：蓝绿色的恐龙宝宝，背上一排圆圆的黄色背刺。
+
+猫头鹰老师（`owl`）：焦糖棕的猫头鹰，戴海军蓝学士帽（黄色流苏）和圆框眼镜。不用在本集画面里画，`K.frame` 在老师说话时自动让它从右下角探出来，嘴跟着老师的配音动（见 scene-cookbook.md「猫头鹰老师」）。
+
+设定稿：四个主角一排在 `characters/<画风>/lineup.jpg`，new_episode.py 复制到项目的 `角色/设定稿/全员.jpg`，生任何新图都把它当参考图；7 个新角色（上排熊猫、大象、青蛙、企鹅，下排小猴、小恐龙、猫头鹰）在 `characters/<画风>/lineup_guests.jpg`，new_episode.py 复制到 `角色/设定稿/客串.jpg`，给新角色生图时把它也加进参考图。7 个新角色 × 5 种画风的对比在 `assets/新角色.jpg`。
+
+新角色的帧已经按和 Bobo 的身高比例缩放好（flat 下 Bobo 429 像素高：大象 536、熊猫和小猴 452、企鹅和小恐龙 410、猫头鹰 389、青蛙 347），`K.ch` 默认缩放 0.9 直接用，站进 `K.row(0..2)` 三排大小合适，不用另配缩放。颜色（气泡、单词卡描边）`K.COL` 里有默认值，本集画面 `colors` 可以覆盖。
 
 ## 已有的帧
 
 | 画风 | 帧 |
 |---|---|
 | 五种都有 | `<角色>_m0` 闭嘴、`_m1` 半张、`_m2` 大张（口型），`_wave` 挥手，`_laugh` 大笑，`_cheer` 欢呼跳起 |
-| 只有 flat | 前两集的动作：`bobo_ask bobo_basket bobo_bite bobo_chew bobo_fall bobo_flap bobo_hold bobo_run1/2 bobo_yuck bobo_yum`，`rabbit_crouch rabbit_jump rabbit_eat0/1/2`，`fish_swim1/2 fish_eat0/1/2`，`bird_fly1/2 bird_eat0/1/2`，食物 `food_apple food_banana food_broccoli food_carrot food_sock` |
-| 只有 crayon | 第3集《Where Is the Cat?》：小猫 `cat_m0/m1/m2 cat_lie cat_crouch cat_jump`（新角色，灰色虎斑小猫），`bobo_search bobo_shrug bobo_lookup bobo_point bobo_headtouch bobo_walk bobo_cover0/1/2 bobo_peek bobo_hug bobo_startle`，`rabbit_point rabbit_pointup fish_point fish_pointup bird_point bird_pointup`（往左指 / 往左上指着笑），道具 `prop_box prop_table prop_tree prop_yarn` |
-| 只有 paper | 第4集《What Color Is It?》：`bobo_hold bobo_hold2`（举拳头拿气球线，闭嘴 / 张嘴）`bobo_lookup`（抬头看），彩虹色 Bobo `bobo_rsurp bobo_rlaugh bobo_rwave`，物品 `balloon_red balloon_yellow balloon_blue balloon_green item_banana item_rainbow` |
+| 五种都有（新角色） | 6 个客串动物同样有 `_m0 _m1 _m2 _wave _laugh _cheer`，加各自的招牌动作：`panda_roll`（侧躺滚成球）、`elephant_trunk`（鼻子甩起来）、`frog_jump`（跳起来）、`penguin_waddle1/2`（摇摆走，两帧左右镜像）、`monkey_hang`（单手吊着）、`dino_stomp`（跺脚）。猫头鹰 `owl_m0 owl_m1 owl_m2 owl_wave owl_point owl_cheer` |
+| 只有 clay | 主角通用动作：`bobo_walk1/2 bobo_run1/2 bobo_sit bobo_sleep bobo_think bobo_surprise bobo_point bobo_clap1/2 bobo_dance1/2 bobo_holdup`（双手举起东西给人看），`rabbit_walk1/2 rabbit_jump rabbit_sit rabbit_point rabbit_surprise rabbit_clap1/2 rabbit_dance1/2`，`fish_swim1/2 fish_leap fish_surprise`，`bird_fly1/2 bird_perch bird_point bird_surprise`。走、跑、拍手、跳舞的两帧交替播放就是一个循环 |
+| 只有 flat | 吃东西、跑跳等动作和食物：`bobo_ask bobo_basket bobo_bite bobo_chew bobo_fall bobo_flap bobo_hold bobo_run1/2 bobo_yuck bobo_yum`，`rabbit_crouch rabbit_jump rabbit_eat0/1/2`，`fish_swim1/2 fish_eat0/1/2`，`bird_fly1/2 bird_eat0/1/2`，食物 `food_apple food_banana food_broccoli food_carrot food_sock` |
+| 只有 crayon | 捉迷藏（方位词）用的：小猫 `cat_m0/m1/m2 cat_lie cat_crouch cat_jump`（新角色，灰色虎斑小猫），`bobo_search bobo_shrug bobo_lookup bobo_point bobo_headtouch bobo_walk bobo_cover0/1/2 bobo_peek bobo_hug bobo_startle`，`rabbit_point rabbit_pointup fish_point fish_pointup bird_point bird_pointup`（往左指 / 往左上指着笑），道具 `prop_box prop_table prop_tree prop_yarn` |
+| 只有 paper | 气球、颜色用的：`bobo_hold bobo_hold2`（举拳头拿气球线，闭嘴 / 张嘴）`bobo_lookup`（抬头看），彩虹色 Bobo `bobo_rsurp bobo_rlaugh bobo_rwave`，物品 `balloon_red balloon_yellow balloon_blue balloon_green item_banana item_rainbow` |
 
 示范集要用到"只有 flat"那一行里的吃东西、野餐、食物帧。用别的画风做示范集，或者新一集要类似动作，就按下面的方法用该画风生成。新生成的帧顺手复制一份到 `characters/<画风>/`，下一集就能直接用。
 
@@ -67,6 +82,8 @@ Sprite sheet of BOBO (the round orange creature, first character in the attached
 
 ### 新角色
 
+下面是从零加一个角色的做法；熊猫、大象、青蛙、企鹅、小猴、小恐龙、猫头鹰已经五种画风都有，不用再生。
+
 先按设定稿的写法生一张新角色的设定稿（参考图仍给全员设定稿，提示词说 "a NEW character in exactly the same art style as the attached lineup"），再生它的口型 + 动作表。
 
 ## 切图、对齐
@@ -90,7 +107,7 @@ Sprite sheet of BOBO (the round orange creature, first character in the attached
 
 - `--frac` 是"下半身"占比，用来对齐：两脚站立 0.25–0.35，鱼这种没脚的 1.0。
 - 跳起来、飞起来的姿势不要当参考帧；参考帧选站着的那张。
-- `--height-of` 按已有素材的画布高度算，而旧帧画布上下常带透明边（rabbit_m0 下面 20 像素、fish_m0 下面 63 像素），新帧会偏大。先量旧帧不透明区域的高度用 `--height`，再把新帧脚底的透明边补成和旧帧一样（第3集踩过）。
+- `--height-of` 按已有素材的画布高度算，而旧帧画布上下常带透明边（rabbit_m0 下面 20 像素、fish_m0 下面 63 像素），新帧会偏大。先量旧帧不透明区域的高度用 `--height`，再把新帧脚底的透明边补成和旧帧一样。
 - 物品图提示词要写明 NO faces：参考图是带脸的角色，Codex 会顺手给盒子、桌子、树都画上脸。
 - 结果写进 `代码工程/assets/`，画面里用名字引用（`K.img('bobo_bite')`，或 `K.ch(c, 'bobo', x, y, t, {pose: 'bobo_bite'})`）。
 - 处理完拼一张图看：大小和已有帧一致、换帧时脚不跳、没有品红边。

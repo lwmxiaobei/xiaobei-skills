@@ -1,0 +1,43 @@
+{
+  "headline": [
+    "离谱！",
+    "退役女优拍完片偷偷学编程",
+    "靠 Claude 接网页开发活命"
+  ],
+  "conclusion": "AI 救了她的人生",
+  "summary": [
+    "日本一名退役女优引退后",
+    "原有社交大号被工作室收回",
+    "失去原有收入来源",
+    "她选择自学编程，借助 Claude 辅助",
+    "承接网页开发相关工作",
+    "依靠 AI 工具降低学习门槛",
+    "逐步完成职业转型"
+  ],
+  "source_label": "来源：当事人公开账号与相关讨论",
+  "short_title": "AI救了她的人生",
+  "cover_title": "AI救了她的人生",
+  "cover_kicker": "当事人公开转型经历",
+  "cover_lines": [
+    "退役后失去原有账号",
+    "她借助 Claude 学习编程",
+    "开始承接网页开发工作"
+  ],
+  "cover_evidence": [
+    "从内容创作转向网页开发"
+  ],
+  "description": "退役后重新开始，她借助 Claude 学编程、做网页，尝试走出一条新的职业道路。",
+  "hashtags": ["#AI", "#Claude", "#编程", "#职业转型"],
+  "segments": [],
+  "settings": {
+    "main_duration": null,
+    "reading_chars_per_second": 5.5,
+    "flash_first_n": 2,
+    "flash_duration": 0.16,
+    "include_outro": true,
+    "background_music": null,
+    "background_music_volume": 0.82,
+    "delivery_dir": "~/Documents/videos",
+    "font_path": null
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "故事卡片视频"
+  short_description: "把文章、视频或截图制作成高密度证据轮播式竖屏短视频"
+  default_prompt: "使用 $story-card-video 把我提供的文章、视频或截图制作成竖屏故事卡片视频。"
